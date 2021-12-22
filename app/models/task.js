@@ -15,7 +15,10 @@ Task.init({
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
-        position: DataTypes.INTEGER,
+        position:{
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
     },
     {
         underscored: true,

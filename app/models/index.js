@@ -36,7 +36,7 @@ List.belongsToMany(Category,{
     as: 'categories',
     through: 'list_has_category',
     foreignKey: {
-        name: 'goal_id', // nom du champs de la clef etrangère
+        name: 'list_id', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
     otherKey: 'category_id',
