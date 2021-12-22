@@ -1,6 +1,7 @@
 // On configure nos variables d'environements
 require('dotenv').config();
 
+const models            = require('./app/models');
 const express           = require('express');
 const session           = require('express-session');
 const cors              = require('cors');
@@ -9,13 +10,13 @@ const multer            = require('multer');
 const app               = express();
 const bodyParser        = multer();
 const router            = require('./app/router');
-const sequelize         = require('./app/database')
+const sequelize         = require('./app/database');
 const expressSwagger    = require('express-swagger-generator')(app);
 const PORT              = process.env.PORT || 3000;
 
 // J'autorise le monde entier à accéder sur mon API
 // Ce n'est pas recommandé
-app.use(cors());
+// app.use(cors());
 
 // L'origine null est le cas où l'on essaye d'acceder à notre API depuis un fichier HTML sans serveur derrière
 // const corsOptions = {
@@ -40,7 +41,18 @@ app.use(cors());
 
 // Creer les tables si elle n'existe pas: option force
 // const init_BDD = async () => {
-//     await sequelize.sync({force: true});
+//     try {
+//         await sequelize.authenticate();
+//         console.log('Connection has been established successfully.');
+//         const created =  sequelize.sync({force: true});
+
+//         if(created) {
+//             console.log("==> TABLE DONE !");
+//         }
+
+//     } catch (error) {
+//         console.error('Unable to connect to the database:', error);
+//     }
 // } 
 // init_BDD();
 
