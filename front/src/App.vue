@@ -40,7 +40,7 @@
                     <select type="text" name="" class="w-full p-2 bg-gray-dark rounded shadow-sm appearance-none" id="">
                         <option value="0">Add service</option>
                     </select>
-                </div>
+                </div>               
             </div>
 
             <div class="form-check mb-5">
@@ -384,8 +384,8 @@
 <script>
   import chart from './assets/js/chart.js';
   import main from './assets/js/main.js';
-  import { ref } from 'vue';
-  import { onClickOutside } from '@vueuse/core';
+  //import { ref } from 'vue';
+  //import { onClickOutside } from '@vueuse/core';
 
     const MONTH_NAMES = [
         "January",
@@ -405,9 +405,9 @@
 
     export default {
     setup() {
-      const target = ref(null)
-      onClickOutside(target, (event) => { console.log(target)})
-      return { target }
+    //   const target = ref(null)
+    //   onClickOutside(target, (event) => { console.log(target)})
+    //   return { target }
     },
     data() {
       return {
@@ -449,7 +449,7 @@
         chartScript.setAttribute('src', 'https://cdn.jsdelivr.net/npm/chart.js');
         document.head.appendChild(chartScript);
 
-        chart.init();
+        //chart.init();
         main.init();
       },
 

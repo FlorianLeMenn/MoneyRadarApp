@@ -2,11 +2,9 @@ const chart = {
     init:  function() {
         //get item selected
         const chartNav = document.querySelector('.chart-nav');
-    
         //init chart 
         const data = this.loadDataChart();
         const configLineChart = this.setConfChart(data)
-    
         //create chart
         const myLineChart = new Chart(document.getElementById('chartLine'),configLineChart);
     
