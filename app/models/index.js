@@ -3,10 +3,11 @@ const Category  = require('./category');
 const Finance   = require('./finance');
 const Goal      = require('./goal');
 const Habit     = require('./habit');
+const List      = require('./list');
 const Task      = require('./task');
 const Tag       = require('./tag');
 
-//Mes finances peuvent avoit 0 ou N Categry
+//Mes finances peuvent avoit 0 ou N Category
 Finance.belongsToMany(Category,{ 
     as: 'categories',
     through: 'finance_has_category',
@@ -18,26 +19,91 @@ Finance.belongsToMany(Category,{
     timestamps: false
 });
 
-
-//Un Objectif peut avoit 0 ou N habitudes
-Goal.belongsToMany(Habit,{ 
-    as: 'goal_habits',
-    through: 'goal_has_habit',
+//Mes objectifs peuvent avoit 0 ou N Category
+Goal.belongsToMany(Category,{ 
+    as: 'categories',
+    through: 'goal_has_category',
     foreignKey: {
         name: 'goal_id', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
-    otherKey: 'habit_id',
-    onDelete: 'cascade', //quand je supprime le groupe, je supprime la relation avec tous les users reliés
+    otherKey: 'category_id',
     timestamps: false
+});
+
+//Mes liste peuvent avoit 0 ou N Category
+List.belongsToMany(Category,{ 
+    as: 'categories',
+    through: 'list_has_category',
+    foreignKey: {
+        name: 'goal_id', // nom du champs de la clef etrangère
+        allowNull: false, //rendre obligatoire l'association
+    },
+    otherKey: 'category_id',
+    timestamps: false
+});
+
+//Ma categorie dispose de plusieurs listes
+Category.belongsToMany(List,{ 
+    as: 'lists',
+    through: 'list_has_category',
+    foreignKey: {
+        name: 'category_id', // nom du champs de la clef etrangère
+        allowNull: false, //rendre obligatoire l'association
+    },
+    otherKey: 'list_id',
+    timestamps: false
+});
+
+//Ma categorie dispose de plusieurs objectifs
+Category.belongsToMany(Goal,{ 
+    as: 'goals',
+    through: 'goal_has_category',
+    foreignKey: {
+        name: 'category_id', // nom du champs de la clef etrangère
+        allowNull: false, //rendre obligatoire l'association
+    },
+    otherKey: 'goal_id',
+    timestamps: false
+});
+
+//Mes finances peuvent avoit 0 ou N Categry
+Category.belongsToMany(Finance,{ 
+    as: 'finances',
+    through: 'finance_has_category',
+    foreignKey: {
+        name: 'category_id', // nom du champs de la clef etrangère
+        allowNull: false, //rendre obligatoire l'association
+    },
+    otherKey: 'finance_id',
+    timestamps: false
+});
+
+// l'objectif dépend d'un utilisateur
+Goal.belongsTo(User,{ 
+    as: 'user',
+    foreignKey: {
+        name: 'user_id', // nom du champs de la clef etrangère
+        allowNull: false, //rendre obligatoire l'association
+    },
+    onDelete: 'cascade', //quand je supprime le user, je supprime la relation avec tous les groups reliés
 });
 
 // l'habitude dépend d'un objectif
 Habit.belongsTo(Goal,{ 
     as: 'goal',
-    through: 'goal_has_habit',
     foreignKey: {
         name: 'goal_id', // nom du champs de la clef etrangère
+        allowNull: false, //rendre obligatoire l'association
+    },
+    onDelete: 'cascade', //quand je supprime le user, je supprime la relation avec tous les groups reliés
+});
+
+// Une tache dépend d'une liste
+Task.belongsTo(List,{ 
+    as: 'list',
+    foreignKey: {
+        name: 'list_id', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
     onDelete: 'cascade', //quand je supprime le user, je supprime la relation avec tous les groups reliés
@@ -49,17 +115,16 @@ Goal.hasMany(Habit,{
     foreignKey: 'goal_id',
 });
 
+//Ma liste à plusieurs taches
+List.hasMany(Task,{
+    as: 'tasks',
+    foreignKey: 'list_id',
+});
 
-// Un utilisateur a créé 0 ou N Objectifs
+//Un utilisateur a créé 0 ou N Objectifs
 User.hasMany(Goal, {
-    as: 'user_goals',
+    as: 'goals',
     foreignKey: 'user_id'
 })
 
-// Un utilisateur a créé 0 ou N habitudes
-User.hasMany(Habit, {
-    foreignKey: 'user_id',
-    as: 'user_habits'
-})
-
-module.exports = { User, Category, Finance, Goal, Habit, Task, Tag};
+module.exports = { User, Category, Finance, Goal, Habit, Task, Tag, List };

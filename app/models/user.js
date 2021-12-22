@@ -22,7 +22,7 @@ User.init({
         },
         roles: {
             type: DataTypes.JSON,
-            default: {"roles":[{
+            defaultValue: {"roles":[{
                     "role_name":"ROLE_USER",
                 }
             ]},

@@ -13,7 +13,7 @@ Task.init({
         },
         finish: {
             type: DataTypes.BOOLEAN,
-            default: false
+            defaultValue: false
         },
         position: DataTypes.INTEGER,
     },
