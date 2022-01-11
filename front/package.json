@@ -12,6 +12,7 @@
     "@smartweb/vue-flash-message": "^1.0.0-alpha.12",
     "@vueuse/core": "^7.4.0",
     "axios": "^0.24.0",
+    "chart.js": "^3.7.0",
     "core-js": "^3.6.5",
     "vue": "^3.0.0",
     "vue-loader": "^16.8.3",
