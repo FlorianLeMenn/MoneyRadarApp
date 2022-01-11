@@ -1,16 +1,14 @@
 const chart = {
-    init:  function() {
+    init:  function(myLineChart) {
+        console.log("INIT");
         //get item selected
         const chartNav = document.querySelector('.chart-nav');
-        //init chart 
-        const data = this.loadDataChart();
-        const configLineChart = this.setConfChart(data)
-        //create chart
-        const myLineChart = new Chart(document.getElementById('chartLine'),configLineChart);
     
         chartNav.addEventListener('click', (e) => {
             const period = e.target.dataset.item;
             const classes = ["selected", "py-1", "px-4" ,"text-white" ,"rounded-full", "bg-gray-light"];
+
+            console.log("periode" + period);
     
             if(period === undefined) {return;}
     

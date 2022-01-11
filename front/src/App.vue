@@ -8,16 +8,7 @@
             <div class="mb-2 text-base">Total dépenses</div>
             <p class="text-gray-500 text-2xl">15000€</p>
         </div>
-        <div class="chart-nav m-4 flex justify-around items-center text-center text-gray1">
-            <div class="week selected py-1 px-2 text-white rounded-full bg-gray-light" data-item="week">Semaine</div>
-            <div class="month" data-item="month">Mois</div>
-            <div class="year" data-item="year">Année</div>
-        </div>
-        <div class="container">
-            <div class=" overflow-hidden">
-                <canvas class="" id="chartLine"></canvas>
-            </div>
-        </div>
+            <depensesChart/>
     </div>
     <div class="m-2 max-w-sm mx-auto flex text-center">
         <a href="#" class="addNewBtn p-4 grow max-w rounded-xl bg-blue text-white text-sm uppercase">Ajouter une
@@ -382,9 +373,9 @@
 </template>
 
 <script>
-  import chart from './assets/js/chart.js';
-  import main from './assets/js/main.js';
-  //import { ref } from 'vue';
+    import depensesChart from './components/depensesChart.vue'
+    import main from './assets/js/main.js';
+    import { ref } from 'vue';
   //import { onClickOutside } from '@vueuse/core';
 
     const MONTH_NAMES = [
@@ -404,6 +395,9 @@
     const DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
     export default {
+    components: {
+        depensesChart
+    },
     setup() {
     //   const target = ref(null)
     //   onClickOutside(target, (event) => { console.log(target)})
@@ -411,46 +405,49 @@
     },
     data() {
       return {
-          showDatepicker: false,
-          datepickerValue: "",
-          month: "",
-          year: "",
-          no_of_days: [],
-          blankdays: [],
-          days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
-          DAYS: DAYS,
-          MONTH_NAMES: MONTH_NAMES,
+            showDatepicker: false,
+            datepickerValue: "",
+            month: "",
+            year: "",
+            no_of_days: [],
+            blankdays: [],
+            days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
+            DAYS: DAYS,
+            MONTH_NAMES: MONTH_NAMES,
       };
     },
+    beforeCreate() {
+        // let chartScript = document.createElement('script');
+        // chartScript.setAttribute('src', 'https://cdn.jsdelivr.net/npm/chart.js');
+        // document.head.appendChild(chartScript);
+        console.log('BEFORE')
+    },
+    created() {
+        console.log('CREATED');
+    },
     mounted() {
-          this.initDate();
-          this.getNoOfDays();
-          this.initChart();
-          //l'app est load
-          this.$nextTick( function() {
-            
+        console.log('MOUNTED');
+            this.initDate();
+            this.getNoOfDays();
+            //l'app est load
+            main.init();
+            this.$nextTick( function() {
           }
         );
     },
+    watch: {
+
+    },
     methods: {
       initDate() {
-          let today = new Date();
-          this.month = today.getMonth();
-          this.year = today.getFullYear();
+          let today     = new Date();
+          this.month    = today.getMonth();
+          this.year     = today.getFullYear();
           this.datepickerValue = new Date(
               this.year,
               this.month,
               today.getDate()
           ).toDateString();
-      },
-
-      initChart() {
-        let chartScript = document.createElement('script');
-        chartScript.setAttribute('src', 'https://cdn.jsdelivr.net/npm/chart.js');
-        document.head.appendChild(chartScript);
-
-        //chart.init();
-        main.init();
       },
 
       getNoOfDays() {
@@ -475,6 +472,7 @@
           this.blankdays = blankdaysArray;
           this.no_of_days = daysArray;
       },
+
       isToday(date) {
           const today = new Date();
           const d = new Date(this.year, this.month, date);
