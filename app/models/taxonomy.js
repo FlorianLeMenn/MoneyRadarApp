@@ -1,20 +1,28 @@
 // on importe la connexion
-const sequelize = require('./../database');
+const sequelize = require('../database');
 const {DataTypes, Model} = require('sequelize');
 
-class Category extends Model {};
+class Taxonomy extends Model {};
 
-Category.init({
-        title: {
+Taxonomy.init({
+        name: {
             type: DataTypes.STRING,
             allowNull: false
-        }
+        },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        weight: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
     },
     {
         underscored: true,
         sequelize, //connexion a l'instance
-        timestamps: true,
-        tableName: 'category'
+        timestamps: false,
+        tableName: 'taxonomy'
     }
 );
 
@@ -22,4 +30,4 @@ Category.init({
 //Category.sync({ force: true });
 //console.log("==> The table for the Category model was just (re)created!");
 
-module.exports = Category;
+module.exports = Taxonomy;

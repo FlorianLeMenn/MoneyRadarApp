@@ -1,5 +1,6 @@
 const User      = require('./user');
-const Category  = require('./category');
+const Taxonomy  = require('./taxonomy');
+const Vocabulary  = require('./vocabulary');
 const Finance   = require('./finance');
 const Goal      = require('./goal');
 const Habit     = require('./habit');
@@ -7,60 +8,82 @@ const List      = require('./list');
 const Task      = require('./task');
 const Tag       = require('./tag');
 
-//Mes finances peuvent avoit 0 ou N Category
-Finance.belongsToMany(Category,{ 
-    as: 'categories',
-    through: 'finance_has_category',
+//Mes finances peuvent avoit 0 ou N Taxonomy
+Finance.belongsToMany(Taxonomy,{ 
+    as: 'taxonomies',
+    through: 'finance_has_taxonomy',
     foreignKey: {
         name: 'finance_id', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
-    otherKey: 'category_id',
+    otherKey: 'tid',
     timestamps: false
 });
 
-//Mes objectifs peuvent avoit 0 ou N Category
-Goal.belongsToMany(Category,{ 
-    as: 'categories',
-    through: 'goal_has_category',
+//Mes objectifs peuvent avoit 0 ou N Taxonomy
+Goal.belongsToMany(Taxonomy,{ 
+    as: 'taxonomies',
+    through: 'goal_has_taxonomy',
     foreignKey: {
         name: 'goal_id', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
-    otherKey: 'category_id',
+    otherKey: 'tid',
     timestamps: false
 });
 
-//Mes liste peuvent avoit 0 ou N Category
-List.belongsToMany(Category,{ 
-    as: 'categories',
-    through: 'list_has_category',
+//Mes liste peuvent avoit 0 ou N Taxonomy
+List.belongsToMany(Taxonomy,{ 
+    as: 'taxonomies',
+    through: 'list_has_taxonomy',
     foreignKey: {
         name: 'list_id', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
-    otherKey: 'category_id',
+    otherKey: 'tid',
     timestamps: false
 });
 
-//Ma categorie dispose de plusieurs listes
-Category.belongsToMany(List,{ 
-    as: 'lists',
-    through: 'list_has_category',
+// la taxo dépend d'un vocabulaire
+Taxonomy.belongsTo(Vocabulary,{ 
+    as: 'vocabulary',
     foreignKey: {
-        name: 'category_id', // nom du champs de la clef etrangère
+        name: 'vid', // nom du champs de la clef etrangère
+        allowNull: false, //rendre obligatoire l'association
+    },
+    onDelete: 'CASCADE', //quand je supprime le voc, je supprime la relation avec tous les taxo reliés
+});
+
+//Hierarchie des taxo
+Taxonomy.belongsTo(Taxonomy,{ 
+    as: 'taxonomy_parent',
+    through: 'taxonomy_hierarchy',
+    foreignKey: {
+        name: 'parent', // nom du champs de la clef etrangère
+        allowNull: false, //rendre obligatoire l'association
+        defaultValue: 0
+    },
+    timestamps: false
+});
+
+//Ma categorie dispose / appartient à de plusieurs listes
+Taxonomy.belongsToMany(List,{ 
+    as: 'lists',
+    through: 'list_has_taxonomy',
+    foreignKey: {
+        name: 'tid', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
     otherKey: 'list_id',
     timestamps: false
 });
 
-//Ma categorie dispose de plusieurs objectifs
-Category.belongsToMany(Goal,{ 
+//Ma categorie dispose / appartient à de plusieurs objectifs
+Taxonomy.belongsToMany(Goal,{ 
     as: 'goals',
-    through: 'goal_has_category',
+    through: 'goal_has_taxonomy',
     foreignKey: {
-        name: 'category_id', // nom du champs de la clef etrangère
+        name: 'tid', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
     otherKey: 'goal_id',
@@ -68,11 +91,11 @@ Category.belongsToMany(Goal,{
 });
 
 //Mes finances peuvent avoit 0 ou N Categry
-Category.belongsToMany(Finance,{ 
+Taxonomy.belongsToMany(Finance,{ 
     as: 'finances',
-    through: 'finance_has_category',
+    through: 'finance_has_taxonomy',
     foreignKey: {
-        name: 'category_id', // nom du champs de la clef etrangère
+        name: 'tid', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
     otherKey: 'finance_id',
@@ -96,7 +119,7 @@ Habit.belongsTo(Goal,{
         name: 'goal_id', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
-    onDelete: 'cascade', //quand je supprime le user, je supprime la relation avec tous les groups reliés
+    onDelete: 'cascade', //quand je supprime le but, je supprime la relation avec tous les habitudes reliés
 });
 
 // Une tache dépend d'une liste
@@ -106,7 +129,7 @@ Task.belongsTo(List,{
         name: 'list_id', // nom du champs de la clef etrangère
         allowNull: false, //rendre obligatoire l'association
     },
-    onDelete: 'cascade', //quand je supprime le user, je supprime la relation avec tous les groups reliés
+    onDelete: 'cascade', //quand je supprime la liste, je supprime la relation avec tous les taches reliés
 });
 
 //Mon objectif à plusieurs habitudes
@@ -127,4 +150,4 @@ User.hasMany(Goal, {
     foreignKey: 'user_id'
 })
 
-module.exports = { User, Category, Finance, Goal, Habit, Task, Tag, List };
+module.exports = { User, Taxonomy, Finance, Goal, Habit, Task, Tag, List };

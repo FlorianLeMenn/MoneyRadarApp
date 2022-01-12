@@ -1,5 +1,4 @@
 const sequelize = require('./../database');
-const Category = require('./category');
 const {DataTypes, Model, Deferrable} = require('sequelize');
 
 class Habit extends Model {};
