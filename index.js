@@ -16,14 +16,14 @@ const PORT              = process.env.PORT || 3000;
 
 // J'autorise le monde entier à accéder sur mon API
 // Ce n'est pas recommandé
-// app.use(cors());
+    app.use(cors());
 
 // L'origine null est le cas où l'on essaye d'acceder à notre API depuis un fichier HTML sans serveur derrière
 // const corsOptions = {
 //     origin: [`${process.env.DEV}:${PORT}`, 'null'], //string, array ou callback possible
 //     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 // }
-//app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 //Gestion des sessions
 // app.use(session({
@@ -84,28 +84,29 @@ const PORT              = process.env.PORT || 3000;
 // expressSwagger(options);
 
 // on utlise .none() pour dire qu'on attends pas de fichier, uniquement des inputs "classiques" !
-//app.use(bodyParser.none());
+app.use(bodyParser.none());
 
 //Gestion du body parser: rendre clair les réponses des forms (post)
-//app.use(express.urlencoded({extended:true}));
-//app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 
 //Sécurité des données reçu
-// app.use((req, res, next) => {
-//     // Pour chaque Donnée dans mon req.body
-//     for(const key in req.body) {
-//     // Je sanitize chaque donnée de mon body
-//         req.body[key] = sanitizer.escape(req.body[key]);
-//     }
+app.use((req, res, next) => {
+    // Pour chaque Donnée dans mon req.body
+    for(const key in req.body) {
+    // Je sanitize chaque donnée de mon body
+        req.body[key] = sanitizer.escape(req.body[key]);
+    }
 
-//     // Pour chaque Donnée dans mon req.params
-//     for(const key in req.params) {
-//     // Je sanitize chaque donnée de mon body
-//         req.params[key] = sanitizer.escape(req.params[key]);
-//     }
+    // Pour chaque Donnée dans mon req.params
+    for(const key in req.params) {
+    // Je sanitize chaque donnée de mon body
+        req.params[key] = sanitizer.escape(req.params[key]);
+    }
 
-//     next();
-// });
+    next();
+});
+
+app.use(express.json());
 
 // On dis à notre application express d'utiliser le router que l'on a récupérer de notre fichier router.js
 app.use(router);

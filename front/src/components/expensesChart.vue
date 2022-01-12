@@ -16,9 +16,9 @@ import { Chart, registerables} from 'chart.js';
 import myChart from '../assets/js/chart.js';
 
 export default {
-  name: 'depensesChart',
+  name: 'expensesChart',
     created() {
-        console.log('CREATED CHART');
+        //console.log('CREATED CHART');
         Chart.register(...registerables);
         
     },
