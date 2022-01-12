@@ -8,8 +8,9 @@ const utilsMiddleware = require('./middleware/utils');
 router.route('/:modelName')
 // On ajoute un middleware qui va permettre d'ajouter le modèle dans notre requête
   .all(utilsMiddleware.addModelInRequest)
-  .get(mainController.getAll)
-  .post(mainController.create);
+  .get(mainController.getAll);
+  
+router.route('/:modelName').post(mainController.create);
 
 // On ajoute une regex qui va permettre a express d'intercepter seulement les url avec un identifiant correspondant à un nombre
 router.route('/:modelName/:id(\\d+)')

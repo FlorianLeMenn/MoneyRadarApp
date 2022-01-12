@@ -60,8 +60,7 @@ Taxonomy.belongsTo(Taxonomy,{
     through: 'taxonomy_hierarchy',
     foreignKey: {
         name: 'parent', // nom du champs de la clef etrangère
-        allowNull: false, //rendre obligatoire l'association
-        defaultValue: 0
+        allowNull: true,
     },
     timestamps: false
 });
@@ -150,4 +149,4 @@ User.hasMany(Goal, {
     foreignKey: 'user_id'
 })
 
-module.exports = { User, Taxonomy, Finance, Goal, Habit, Task, Tag, List };
+module.exports = { User, Taxonomy, Vocabulary, Finance, Goal, Habit, Task, Tag, List };

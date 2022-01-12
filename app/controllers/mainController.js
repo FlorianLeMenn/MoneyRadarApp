@@ -9,7 +9,7 @@ module.exports = {
         if (found) {
             options = {
                 include: {
-                    association: 'categories',
+                    association: 'taxonomies',
                 }
             };
         }
@@ -40,6 +40,8 @@ module.exports = {
     },
     async create(req, res) {
       try {
+        // console.log('CREATE');
+        // console.log('BODY = ' + req.body);
         // Je créer ma donnée avec les infos situées dans le body
         // On laisse Sequelize s'occuper de la validation des champs
         const data = await req.Model.create(req.body);
@@ -51,6 +53,9 @@ module.exports = {
     },
     async update(req, res, next) {
       try {
+        // console.log('UPDATE');
+        // console.log('ID = ' + req.params.id);
+        // console.log('BODY = ' + req.body);
         // On modifie notre donnée grâce au where. Les données qui seront modifiées seront celle du req.body
         const [nbUpdated, data] = await req.Model.update(req.body, {
           where: {
