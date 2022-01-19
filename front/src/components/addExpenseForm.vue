@@ -29,13 +29,13 @@
                 <div class="flex flex-col sm:flex-row items-center mb-5 sm:space-x-5">
                     <div class="w-full">
                         <p class="mb-2 font-semibold text-gray1">Catégorie</p>
-                        <select v-model="newExpense.categories" name="categories" class="w-full p-2 bg-gray-dark rounded shadow-sm appearance-none" id="">
+                        <select v-model="newExpense.taxonomies" name="categoriesList" class="w-full p-2 bg-gray-dark rounded shadow-sm appearance-none" id="">
                             <!-- <option v-for="category in categories" v-bind:value="category.value" :key="category.value">
                                 {{ category.text }}
                             </option> -->
-                            <optgroup v-for=" parentCategory in categories" :label="parentCategory.text" :key="parentCategory.value">
-                                <option v-for="option in parentCategory.children" :value="option.value" :key="option.value">
-                                    {{ option.text }}
+                            <optgroup v-for=" parentCategory in categoriesList" :label="parentCategory.name" :key="parentCategory.id">
+                                <option v-for="option in parentCategory.children" :value="option.id" :key="option.id">
+                                    {{ option.name }}
                                 </option>
                             </optgroup>
                         </select>
@@ -269,77 +269,6 @@ axios.defaults.baseURL = 'http://localhost:3000';
 
     const DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
-    const categories = [
-    { text: 'Taxes', value: 0, children:
-        [
-            { text: 'Impots / taxes', value: 1 },
-        ],
-    },
-    { text: 'Santé', value: 2, children:
-        [
-            { text: 'Santé - Assurance', value: 3 },
-            { text: 'Santé - Médicaments & autres', value: 4 },
-        ],
-    },
-    { text: 'Transports', value: 5, children: 
-        [
-            { text: 'Transport en commun', value: 6 }
-        ],
-    },
-    { text: 'Courses', value: 7, children:
-        [
-            { text: 'Alimentaire', value: 8 },
-            { text: 'Cosmétique', value: 9 },
-            { text: 'Produits d\'entretient', value: 10 },
-        ],
-    },
-    { text: 'Logement', value: 11, children:
-        [
-            { text: 'Mobilier & accessoires', value: 12 },
-            { text: 'Décoration', value: 13 },
-            { text: 'Jardin', value: 14 },
-            { text: 'Assurance', value: 15 },
-        ],
-    },
-    { text: 'Voiture', value: 16, children:
-        [
-            { text: 'Carburrant', value: 17 },
-            { text: 'Amendes', value: 18 },
-            { text: 'Réparation', value: 19 },
-            { text: 'Entretient', value: 20 },
-            { text: 'Assurance', value: 21 },
-        ],
-    },
-    { text: 'Abonnements', value: 22, children:
-        [
-            { text: 'Téléphone', value: 23 },
-            { text: 'Box internet', value: 24 },
-            { text: 'Autres', value: 25 },
-        ],
-    },
-    { text: 'Loisirs', value: 26, children:
-        [
-            { text: 'Sortie', value: 27 },
-            { text: 'Restaurant', value: 28 },
-            { text: 'Cadeaux', value: 29 },
-            { text: 'Vacance', value: 30 },
-            { text: 'Vêtements', value: 31 },
-            { text: 'Gadget', value: 32 },
-        ],
-    },
-    { text: 'Apprentissage', value: 29, children:
-        [
-            { text: 'Formation & cours', value: 30 },
-            { text: 'Livre', value: 31 },
-        ],
-    },
-    { text: 'Autre', value: 32, children:  
-        [
-            { text: 'Bureautique', value: 33 }
-        ],
-    },
-];
-
 export default {
   name: 'addExpenseForm',
       data() {
@@ -350,20 +279,19 @@ export default {
             year: "",
             no_of_days: [],
             blankdays: [],
-            days: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
             DAYS: DAYS,
             MONTH_NAMES: MONTH_NAMES,
             message:'',
             error: '',
             expense: '',
-            categories: categories,
+            categoriesList: undefined,
             newExpense: {
                 title: undefined,
                 cost: 0,
                 recurrent: false,
                 intervall: 0,
                 periodicity: 2,
-                categories: undefined,
+                taxonomies: undefined,
             }
         };
     },
@@ -374,6 +302,7 @@ export default {
     mounted() {
         this.initDate();
         this.getNoOfDays();
+        this.initCategories();
     },
     methods: {
         async addExpense() {
@@ -388,6 +317,41 @@ export default {
 
             } catch (error) {
                 this.error = error.response.data;
+            }
+        },
+        async initCategories() {
+            try {
+                const {data} = await axios.get(`/vocabulary/1`);
+                if (data.taxonomies) {
+                    this.message = 'Impossible de trouver les catégories';
+                }
+
+                //boucle de trie parent / enfants
+                let hierarchy = [];
+                data.taxonomies.forEach(el => {
+                    if (el.parent === null){
+                        const children =  data.taxonomies.filter(child => child.parent == el.id)
+                        hierarchy.push({name: el.name, weight: el.weight, children: children });
+                    }
+                });
+
+                this.categoriesList = hierarchy;
+
+            } catch (error) {
+                console.log(error);
+                this.error = error.response;
+            }
+        },
+        async getTaxonomie() {
+            try {
+                const {data} = await axios.get(`/taxonomy/`, this.newExpense.taxonomies);
+                if (data.taxonomies) {
+                    this.message = 'Impossible de trouver la catégorie';
+                }
+
+            } catch (error) {
+                console.log(error);
+                this.error = error.response;
             }
         },
         initDate() {

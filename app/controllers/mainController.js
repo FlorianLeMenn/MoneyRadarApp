@@ -2,17 +2,17 @@ module.exports = {
     async getAll(req, res) {
       try {
         // Grâce au middleware utiliser juste avant mon controller, le model de ma route est stocké dans la propriété Model de mon objet req.
-        var categorizedModels = ['Finance', 'Goal', 'List'];
+        //var categorizedModels = ['Vocabulary', 'Finance', 'Goal', 'List'];
         let options = {};
-        const found = categorizedModels.includes(req.Model.name);
+        // const found = categorizedModels.includes(req.Model.name);
 
-        if (found) {
-            options = {
-                include: {
-                    association: 'taxonomies',
-                }
-            };
-        }
+        // if (found) {
+        //     options = {
+        //         include: {
+        //             association: 'taxonomies',
+        //         }
+        //     };
+        // }
         
         const data = await req.Model.findAll(options);
   
@@ -23,7 +23,17 @@ module.exports = {
     },
     async getOne(req, res, next) {
       try {
-        const data = await req.Model.findByPk(req.params.id);
+        var categorizedModels = ['Vocabulary', 'Finance', 'Goal', 'List'];
+        let options = {};
+        const found = categorizedModels.includes(req.Model.name);
+        if (found) {
+          options = {
+              include: {
+                  association: 'taxonomies',
+              }
+          };
+        }
+        const data = await req.Model.findByPk(req.params.id, options);
   
         // Si la donnée n'existe pas, on va appeler le middleware suivant, dans notre cas il n'y en a pas. Cela va retourner une 404
         if(!data) {
@@ -40,11 +50,16 @@ module.exports = {
     },
     async create(req, res) {
       try {
-        // console.log('CREATE');
-        // console.log('BODY = ' + req.body);
+        const category = req.body.taxonomies;
         // Je créer ma donnée avec les infos situées dans le body
         // On laisse Sequelize s'occuper de la validation des champs
         const data = await req.Model.create(req.body);
+        if(category) {
+          const hasCategory = await data.hasTaxonomy(category);
+          if(!hasCategory) {
+            const newCategory = await data.addTaxonomy(category);
+          }
+        }
   
         res.json(data);
       } catch (err) {

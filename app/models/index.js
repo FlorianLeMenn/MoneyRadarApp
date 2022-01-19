@@ -45,6 +45,13 @@ List.belongsToMany(Taxonomy,{
 });
 
 // la taxo dépend d'un vocabulaire
+Vocabulary.hasMany(Taxonomy,{ 
+    as: 'taxonomies',
+    foreignKey: 'vid', // nom du champs de la clef etrangère
+    onDelete: 'CASCADE', //quand je supprime le voc, je supprime la relation avec tous les taxo reliés
+});
+
+// la taxo dépend d'un vocabulaire
 Taxonomy.belongsTo(Vocabulary,{ 
     as: 'vocabulary',
     foreignKey: {
@@ -89,7 +96,7 @@ Taxonomy.belongsToMany(Goal,{
     timestamps: false
 });
 
-//Mes finances peuvent avoit 0 ou N Categry
+//Mes finances peuvent avoit 0 ou N Categorie
 Taxonomy.belongsToMany(Finance,{ 
     as: 'finances',
     through: 'finance_has_taxonomy',
