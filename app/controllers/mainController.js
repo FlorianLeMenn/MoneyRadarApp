@@ -1,17 +1,17 @@
 const { Op } = require('sequelize')
+const {startOfWeek, lastDayOfWeek} = require('date-fns');
 
 module.exports = {
     async getAll(req, res) {
       try {
         // Grâce au middleware utiliser juste avant mon controller, le model de ma route est stocké dans la propriété Model de mon objet req.
-        const sevenDaysAgo = new Date(new Date().setDate(new Date().getDate() - 7));
         let options = {
           //offset: 5, 
-          limit: 7,
+          limit: 5,
           where: {
             date: {
-              [Op.gte]: sevenDaysAgo,
-              [Op.lt]: new Date(),
+              [Op.gte]: startOfWeek(new Date(), { weekStartsOn: 1 }),
+              [Op.lt]: lastDayOfWeek(new Date(), { weekStartsOn: 1 }),
             }
           },
           order: [

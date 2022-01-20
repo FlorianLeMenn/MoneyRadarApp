@@ -2,6 +2,11 @@
 <template>
     <div class="expense-list-container">
         <div class="list weekList flex flex-col p-6 max-w-sm mx-auto bg-gray rounded-xl shadow-lg">
+            <div class="mb-4 flex items-center gap-4 flex-row">
+                    <div class="title font-bold">Dépenses de la semaine :</div>
+                    <div class="ml-auto font-bold text-right">-{{ total }}€</div>
+            </div>
+            <hr class="text-gray1 mb-4">
             <div v-for="expense in expenseList" :value="expense.id" :key="expense.id" class="mb-4 flex items-center gap-4 flex-row">
                 <div class="">
                     Cat: {{ expense.taxonomies[0].id }}
@@ -136,6 +141,7 @@ export default {
         return {
             message: '',
             error: '',
+            total: '',
             expenseList: [],
         };
     },
@@ -158,7 +164,8 @@ export default {
                 }
                 this.message = 'Dépense récupérées';
                 this.expenseList = financeList.data.filter(el => el.date = this.formatDate(new Date(el.date)));
-
+                this.total =  financeList.data.map(el => el.cost).reduce((prev, next) => prev + next);
+                
             } catch (error) {
                 this.error = error.response.data;
             }

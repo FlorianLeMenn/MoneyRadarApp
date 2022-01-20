@@ -315,8 +315,7 @@ export default {
         },
         async addRecurrentExpense() {
             try {
-                console.log("recurrent ? " + this.newExpense.recurrent);
-                console.log("interval = " + this.newExpense.interval);
+
                 //si l'option dépense régulière est cochée
                 if(this.newExpense.recurrent && this.newExpense.interval > 0) {
                     //How many times the expense 
@@ -372,7 +371,7 @@ export default {
                 this.error = error.response.data;
             }
         },
-        
+
         async addExpense() {
             try {
                 console.log(this.newExpense);
