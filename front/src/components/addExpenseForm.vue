@@ -1,6 +1,6 @@
 <template>
     <form 
-        @submit.prevent="addExpense"
+        @submit="onSubmit"
         method="POST"
         action="http://localhost:3000/finance"
     >
@@ -64,9 +64,9 @@
                         cursor-pointer"
                         type="checkbox" 
                         value="" 
-                        id="flexCheckDefault"
+                        id="checkRecurrent"
                     >
-                    <label class="form-check-label inline-block text-gray1" for="flexCheckDefault">
+                    <label class="form-check-label inline-block text-gray1" for="checkRecurrent">
                         Dépense récurrente
                     </label>
                 </div>
@@ -74,19 +74,19 @@
 
 
                 <!-- START period -->
-                <div class="flex sm:flex-row items-baseline mb-5 sm:space-x-5">
+                <div id="recurrentFieldsContainer" class="hidden flex sm:flex-row items-baseline mb-5 sm:space-x-5">
                     <div class="w-1/3">
-                    <!-- START intervall -->
+                    <!-- START interval -->
                         <p class="mb-2 font-semibold text-gray1">Interval</p>
                         <input 
-                            v-model="newExpense.intervall" 
+                            v-model="newExpense.interval" 
                             type="number"
-                            name="intervall"
+                            name="interval"
                             class="w-full p-2 mb-5 bg-gray-dark rounded shadow-sm"
                             id="" 
                         />
                         </div>
-                    <!-- END intervall -->
+                    <!-- END interval -->
                     <div class="w-2/3">
                          <p class="mb-2 font-semibold text-gray1">Période</p>
                         <select v-model="newExpense.periodicity" class="w-full p-2 bg-gray-dark rounded shadow-sm appearance-none" >
@@ -106,7 +106,7 @@
                             <div class="mb-5 w-64">
                                 <label for="datepicker" class="font-bold mb-1 text-gray1 block">Date</label>
                                 <div class="relative">
-                                    <input v-model="newExpense.createdAt" type="hidden" name="createdAt" x-ref="createdAt" />
+                                    <input v-model="newExpense.date" type="text" name="date" ref="date" readonly/>
                                     <input type="text" readonly v-model="datepickerValue"
                                         @click="showDatepicker = !showDatepicker" @keydown.escape="showDatepicker = false"
                                         class="
@@ -121,7 +121,7 @@
                                             text-gray-600
                                             bg-gray-dark
                                             font-medium
-                                            " placeholder="Select date" />
+                                            " placeholder="Selectionnez la date" />
                                     <div class="absolute top-0 right-0 px-3 py-2">
                                         <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor">
@@ -249,6 +249,7 @@
 </template>
 
 <script>
+import {addDays, addWeeks, addMonths, addYears, toDate, getTime, parseISO, lastDayOfYear,differenceInMonths, differenceInWeeks, differenceInDays} from 'date-fns';
 import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
@@ -283,14 +284,14 @@ export default {
             MONTH_NAMES: MONTH_NAMES,
             message:'',
             error: '',
-            expense: '',
             categoriesList: undefined,
             newExpense: {
                 title: undefined,
                 cost: 0,
                 recurrent: false,
-                intervall: 0,
-                periodicity: 2,
+                interval: 0,
+                periodicity: 0,
+                date: undefined,
                 taxonomies: undefined,
             }
         };
@@ -305,9 +306,77 @@ export default {
         this.initCategories();
     },
     methods: {
+        onSubmit(e) {
+            e.preventDefault() // don't perform submit action (i.e., `<form>.action`)
+            if (this.newExpense.recurrent) {
+                this.addRecurrentExpense();
+            }
+            this.addExpense();
+        },
+        async addRecurrentExpense() {
+            try {
+                console.log("recurrent ? " + this.newExpense.recurrent);
+                console.log("interval = " + this.newExpense.interval);
+                //si l'option dépense régulière est cochée
+                if(this.newExpense.recurrent && this.newExpense.interval > 0) {
+                    //How many times the expense 
+                    let total, duration = 0
+                    const interval      = this.newExpense.interval;
+                    const periode       = +this.newExpense.periodicity;
+                    const selectedDate  = this.newExpense.date !== undefined ? this.newExpense.date : new Date().toISOString();
+                    const lastDay       = lastDayOfYear(parseISO(selectedDate));
+                    //ajouter une nouvelle dépense en date glissante en fontion de la période et de la date renseignée
+                    //ex: un abonnement mensuel le 15 du mois
+                    switch (periode) {
+                        case 0:
+                            //jour glissant
+                            break;
+                        case 1:
+                                //semaine glissante pendant 1 an
+                                duration = differenceInWeeks(lastDay, parseISO(selectedDate));
+                                total    = Math.round(duration/interval); 
+                                let nextweek = addWeeks(parseISO(selectedDate), interval);
+                                for (let i = 0; i < total; i++) {
+                                    nextweek = addWeeks(nextweek, interval);
+                                    this.newExpense.date = nextweek.toISOString();
+                                    const message = await axios.post(`/finance`, this.newExpense);
+                                    if (!message) {
+                                        this.message = 'Impossible de creer la dépense';
+                                    }
+                                }  
+                            break;
+                        case 2:
+                            //mois glissant
+                            duration = differenceInMonths(lastDay, parseISO(selectedDate));
+                            total    = Math.round(duration/interval)
+                            let nextmonth = addMonths(parseISO(selectedDate), interval);
+                            for (let i = 0; i < total; i++) {
+                                nextmonth = addMonths(nextmonth, interval);
+                                this.newExpense.date = nextmonth.toISOString();
+                                const message = await axios.post(`/finance`, this.newExpense);
+                                if (!message) {
+                                    this.message = 'Impossible de creer la dépense';
+                                }
+                            }
+                            break;
+                        case 3:
+                            //année glissant
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                this.message = 'Dépense crée';
+
+            } catch (error) {
+                this.error = error.response.data;
+            }
+        },
+        
         async addExpense() {
             try {
                 console.log(this.newExpense);
+                
                 const message = await axios.post(`/finance`, this.newExpense);
                 if (!message) {
                     this.message = 'Impossible de creer la dépense';
@@ -322,7 +391,7 @@ export default {
         async initCategories() {
             try {
                 const {data} = await axios.get(`/vocabulary/1`);
-                if (data.taxonomies) {
+                if (!data.taxonomies) {
                     this.message = 'Impossible de trouver les catégories';
                 }
 
@@ -342,6 +411,7 @@ export default {
                 this.error = error.response;
             }
         },
+
         async getTaxonomie() {
             try {
                 const {data} = await axios.get(`/taxonomy/`, this.newExpense.taxonomies);
@@ -354,6 +424,7 @@ export default {
                 this.error = error.response;
             }
         },
+
         initDate() {
             let today     = new Date();
             this.month    = today.getMonth();
@@ -399,15 +470,14 @@ export default {
             let selectedDate = new Date(this.year, this.month, date);
             this.datepickerValue = selectedDate.toDateString();
 
+            this.newExpense.date = selectedDate.toISOString();
+
             this.$refs.date.value =
                 selectedDate.getFullYear() +
                 "-" +
                 ("0" + selectedDate.getMonth()).slice(-2) +
                 "-" +
                 ("0" + selectedDate.getDate()).slice(-2);
-
-            console.log(this.$refs.date.value);
-
             this.showDatepicker = false;
         },
         }

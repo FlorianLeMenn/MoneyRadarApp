@@ -1,18 +1,31 @@
+const { Op } = require('sequelize')
+
 module.exports = {
     async getAll(req, res) {
       try {
         // Grâce au middleware utiliser juste avant mon controller, le model de ma route est stocké dans la propriété Model de mon objet req.
-        //var categorizedModels = ['Vocabulary', 'Finance', 'Goal', 'List'];
-        let options = {};
-        // const found = categorizedModels.includes(req.Model.name);
-
-        // if (found) {
-        //     options = {
-        //         include: {
-        //             association: 'taxonomies',
-        //         }
-        //     };
-        // }
+        const sevenDaysAgo = new Date(new Date().setDate(new Date().getDate() - 7));
+        let options = {
+          //offset: 5, 
+          limit: 7,
+          where: {
+            date: {
+              [Op.gte]: sevenDaysAgo,
+              [Op.lt]: new Date(),
+            }
+          },
+          order: [
+          // Will escape full_name and validate DESC against a list of valid direction parameters
+          ['date', 'DESC']],
+          include: {
+            association: 'taxonomies',
+            attributes: ['id'],
+            through: {
+              attributes: []
+            }    
+          }
+          
+        };
         
         const data = await req.Model.findAll(options);
   

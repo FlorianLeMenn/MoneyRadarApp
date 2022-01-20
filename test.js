@@ -213,7 +213,7 @@ const run = async () => {
                 end: '2021-10-19 11:23:54+02',
                 score: 1,
                 recurrent: true,
-                intervall: 1,
+                interval: 1,
                 periodicity: 1,
                 goal_id: newGoal.id, 
             })

@@ -29,8 +29,8 @@ Habit.init({
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
-        //permet de gérer les intervalle de temps : tous les 10 jours / 2 semaines / 3 mois /1 an
-        intervall: {
+        //permet de gérer les interval de temps : tous les 10 jours / 2 semaines / 3 mois /1 an
+        interval: {
             type: DataTypes.INTEGER,
             allowNull: true
         },
