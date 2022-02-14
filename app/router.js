@@ -9,7 +9,7 @@ router.route('/:modelName')
 // On ajoute un middleware qui va permettre d'ajouter le modèle dans notre requête
   .all(utilsMiddleware.addModelInRequest)
   .get(mainController.getAll);
-  
+
 router.route('/:modelName').post(mainController.create);
 
 // On ajoute une regex qui va permettre a express d'intercepter seulement les url avec un identifiant correspondant à un nombre
@@ -19,5 +19,10 @@ router.route('/:modelName/:id(\\d+)')
   .get(mainController.getOne)
   .patch(mainController.update)
   .delete(mainController.delete);
+
+//selected period  
+router.route('/:modelName/:period(\\w+)')
+  .all(utilsMiddleware.addModelInRequest)
+  .get(mainController.getAll);
 
 module.exports = router;
