@@ -36,14 +36,12 @@ const chart = {
         });
     },
     
-    loadDataChart: function(period = 'week') {
-        let xAxisLegend = [];
-        let periodData  = [];
-        
+    loadDataChart: function(dataChart = null, period = 'week') {
         const today = new Date();
         const month = today.getMonth();
         const year  = today.getFullYear();
         let currIndex = 0;
+        let periodData = [];
     
         if(period === 'week') {
             //les jours passés
@@ -58,7 +56,11 @@ const chart = {
             ];
             //index du jour courant
             currIndex = xAxisLegend.indexOf(today.toLocaleDateString('fr-FR', { weekday: 'long' }));
-            periodData = [0, 10, 5, 2, 20, 0, 40, 20, 10, 5, 2, 20, 30, 45];
+            //default test data
+            if(!dataChart)
+                periodData = [0, 10, 5, 2, 20, 5, 40];
+            //set data
+            periodData = dataChart
         }
         
         if (period === 'month') {
@@ -66,13 +68,13 @@ const chart = {
             const daysInMonth = new Date(year, month, 0).getDate();
             //le jour courrant
     
-            for (let  i=1; i <= daysInMonth; i++) {
+            for (let i=1; i <= daysInMonth; i++) {
                 xAxisLegend.push(i);
             }
             //index du jour courant
             currIndex = today.getDate() - 1
-            periodData = [250, 150, 100, 200, 50, 150, 100, 100, 120, 79, 20, 140];
-
+            if(!dataChart)
+                periodData = [250, 150, 100, 200, 50, 150, 100, 100, 120, 79, 20, 140];
         }
             
         if (period === 'year') {
@@ -92,7 +94,8 @@ const chart = {
             ];
             //index du mois courant
             currIndex = xAxisLegend.indexOf(today.toLocaleDateString('fr-FR', { month: 'long' }));
-            periodData = [250, 150, 100, 200, 50, 150, 100, 100, 120, 79, 20, 140];
+            if(!dataChart)
+                periodData = [250, 150, 100, 200, 50, 150, 100, 100, 120, 79, 20, 140];
         }
     
         const data = {
@@ -129,8 +132,7 @@ const chart = {
                 }
             }]
         };
-    
-    return data;
+        return data;
     },
     
     setConfChart: function(data) {

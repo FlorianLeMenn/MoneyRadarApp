@@ -106,7 +106,7 @@
                             <div class="mb-5 w-64">
                                 <label for="datepicker" class="font-bold mb-1 text-gray1 block">Date</label>
                                 <div class="relative">
-                                    <input v-model="newExpense.date" type="text" name="date" ref="date" readonly/>
+                                    
                                     <input type="text" readonly v-model="datepickerValue"
                                         @click="showDatepicker = !showDatepicker" @keydown.escape="showDatepicker = false"
                                         class="
@@ -250,6 +250,7 @@
 
 <script>
 import {addDays, addWeeks, addMonths, addYears, toDate, getTime, parseISO, lastDayOfYear,differenceInMonths, differenceInWeeks, differenceInDays} from 'date-fns';
+import  { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
 import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
@@ -268,7 +269,7 @@ axios.defaults.baseURL = 'http://localhost:3000';
         "December",
     ];
 
-    const DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+    const DAYS = ["Dim","Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 
 export default {
   name: 'addExpenseForm',
@@ -308,14 +309,17 @@ export default {
     methods: {
         onSubmit(e) {
             e.preventDefault() // don't perform submit action (i.e., `<form>.action`)
+            if(this.newExpense.taxonomies === 'undefined') {
+                this.$store.dispatch('setError', 'La catégorie n\'est pas renseignée.');
+            }
             if (this.newExpense.recurrent) {
                 this.addRecurrentExpense();
             }
             this.addExpense();
+            this.$store.dispatch('loadExpenses');
         },
         async addRecurrentExpense() {
             try {
-
                 //si l'option dépense régulière est cochée
                 if(this.newExpense.recurrent && this.newExpense.interval > 0) {
                     //How many times the expense 
@@ -340,7 +344,7 @@ export default {
                                     this.newExpense.date = nextweek.toISOString();
                                     const message = await axios.post(`/finance`, this.newExpense);
                                     if (!message) {
-                                        this.message = 'Impossible de creer la dépense';
+                                        this.$store.dispatch('setError', 'Impossible de créer la dépense');
                                     }
                                 }  
                             break;
@@ -354,7 +358,7 @@ export default {
                                 this.newExpense.date = nextmonth.toISOString();
                                 const message = await axios.post(`/finance`, this.newExpense);
                                 if (!message) {
-                                    this.message = 'Impossible de creer la dépense';
+                                    this.$store.dispatch('setError', 'Impossible de créer la dépense');
                                 }
                             }
                             break;
@@ -368,7 +372,7 @@ export default {
                 this.message = 'Dépense crée';
 
             } catch (error) {
-                this.error = error.response.data;
+                this.$store.dispatch('setError', error);
             }
         },
 
@@ -378,13 +382,13 @@ export default {
                 
                 const message = await axios.post(`/finance`, this.newExpense);
                 if (!message) {
-                    this.message = 'Impossible de creer la dépense';
+                    this.$store.dispatch('setError', 'Impossible de créer la dépense');
                 }
 
                 this.message = 'Dépense crée';
 
             } catch (error) {
-                this.error = error.response.data;
+                this.$store.dispatch('setError', error);
             }
         },
         async initCategories() {
@@ -428,11 +432,7 @@ export default {
             let today     = new Date();
             this.month    = today.getMonth();
             this.year     = today.getFullYear();
-            this.datepickerValue = new Date(
-                this.year,
-                this.month,
-                today.getDate()
-            ).toDateString();
+            this.datepickerValue = new Date()//.toDateString(); 
         },
 
         getNoOfDays() {
@@ -469,8 +469,11 @@ export default {
             let selectedDate = new Date(this.year, this.month, date);
             this.datepickerValue = selectedDate.toDateString();
 
-            this.newExpense.date = selectedDate.toISOString();
-
+            //this.newExpense.date = selectedDate.toISOString();
+            const utcDate = zonedTimeToUtc(selectedDate, 'Europe/Paris')
+            console.log(selectedDate.toDateString());
+            console.log(utcDate);
+            this.newExpense.date = utcDate
             this.$refs.date.value =
                 selectedDate.getFullYear() +
                 "-" +

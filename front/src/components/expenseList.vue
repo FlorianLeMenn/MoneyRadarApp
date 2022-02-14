@@ -1,15 +1,16 @@
 
-<template>
+<template >
     <div class="expense-list-container">
         <div class="list weekList flex flex-col p-6 max-w-sm mx-auto bg-gray rounded-xl shadow-lg">
             <div class="mb-4 flex items-center gap-4 flex-row">
                     <div class="title font-bold">Dépenses de la semaine :</div>
-                    <div class="ml-auto font-bold text-right">-{{ total }}€</div>
+                    <div class="ml-auto font-bold text-right">-{{ getTotal }}€</div>
             </div>
             <hr class="text-gray1 mb-4">
-            <div v-for="expense in expenseList" :value="expense.id" :key="expense.id" class="mb-4 flex items-center gap-4 flex-row">
+            {{this.$store.state.error}}
+            <div v-for="expense in expensesList" :value="expense.id" :key="expense.id" class="mb-4 flex items-center gap-4 flex-row">
                 <div class="">
-                    Cat: {{ expense.taxonomies[0].id }}
+                    <!-- Cat: {{ expense.taxonomies[0].id }} -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
                         <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
@@ -20,6 +21,9 @@
                     <div class="date text-sm text text-left text-gray1">{{ expense.date }}</div>
                 </div>
                 <div class="ml-auto font-bold text-right">-{{ expense.cost }}€</div>
+                <div class="ml-auto font-bold text-right">
+                    <button v-if="expense.id" @click="this.$store.dispatch('removeExpense', expense.id)">Supprimer</button>
+                </div>
             </div>
             <div class="mx-auto max-w-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,39 +140,26 @@ import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
 export default {
-  name: 'expenseList',
-      data() {
-        return {
-            message: '',
-            error: '',
-            total: '',
-            expenseList: [],
-        };
+    name: 'expenseList',
+    props: ['expensesList'],
+    data() {
+    return {
+        message: '',
+        error: '',
+    };
     },
-    created() {
-
-    },
-    mounted() {
-        this.allExpenses()
-    },
-    methods: {
-        formatDate(date) {
-            return format(date, 'dd/MM/yyyy - HH:mm');
-        },
-        async allExpenses() {
-            try {
-                const financeList = await axios.get(`/finance`);
-                console.log(financeList.data);
-                if (!financeList.data) {
-                    this.message = 'Impossible de récupérer les dépenses';
-                }
-                this.message = 'Dépense récupérées';
-                this.expenseList = financeList.data.filter(el => el.date = this.formatDate(new Date(el.date)));
-                this.total =  financeList.data.map(el => el.cost).reduce((prev, next) => prev + next);
-                
-            } catch (error) {
-                this.error = error.response.data;
+    computed: {
+        getTotal() {
+            let total   = 0;
+            const data  = this.$props.expensesList;
+            if(data) {
+                for (const key in data) {
+                    if (Object.hasOwnProperty.call(data, key)) {
+                        total += +data[key].cost;
+                    }
+                }  
             }
+            return total;
         },
     }
 }

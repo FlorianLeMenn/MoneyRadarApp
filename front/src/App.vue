@@ -6,9 +6,9 @@
     <div class="p-6 max-w-sm mx-auto bg-gray rounded-xl shadow-lg flex flex-col ">
         <div class="justify-center items-center text-center">
             <div class="mb-2 text-base">Total dépenses</div>
-            <p class="text-gray-500 text-2xl">15000€</p>
+            <p class="text-gray-500 text-2xl">{{ total }}</p>
         </div>
-            <expensesChart/>
+            <expensesChart :groupedExpenses="groupedExpenses" />
     </div>
     <div class="m-2 max-w-sm mx-auto flex text-center">
         <a href="#" class="addNewBtn p-4 grow max-w rounded-xl bg-blue text-white text-sm uppercase">Ajouter une
@@ -16,8 +16,8 @@
     </div>
 
     <add-expense-form></add-expense-form> 
-
-    <expense-list></expense-list>
+         {{error}}
+    <expense-list :expensesList="expensesList" ></expense-list>
         <div class="mt-4 py-2 mx-auto max-w-sm flex flex-row items-center justify-around bg-gray">
         <div class="menu-item hover:bg-gray-dark">
             <a href="" class="menu-link p-4 block">
@@ -55,7 +55,6 @@
     import addExpenseForm from './components/addExpenseForm.vue'
     import main from './assets/js/main.js';
     import expenseList from './components/expenseList.vue';
-  //import { onClickOutside } from '@vueuse/core';
 
     export default {
     components: {
@@ -63,35 +62,35 @@
         addExpenseForm,
         expenseList
     },
-    setup() {
-    //   const target = ref(null)
-    //   onClickOutside(target, (event) => { console.log(target)})
-    //   return { target }
-    },
-    // data() {
-    // },
-    beforeCreate() {
-        // let chartScript = document.createElement('script');
-        // chartScript.setAttribute('src', 'https://cdn.jsdelivr.net/npm/chart.js');
-        // document.head.appendChild(chartScript);
-        //console.log('BEFORE')
-    },
-    created() {
-        //console.log('CREATED');
-    },
+    created() {this.$store.dispatch('loadExpenses');},
     mounted() {
-        //console.log('MOUNTED');
         //l'app est load
         main.init();
-        this.$nextTick(function() {
-            }
-        );
+        this.$store.dispatch('loadAllExpenses');
+        this.$store.dispatch('loadExpensesTotal');
     },
-    watch: {
+    
+    //prorietes calculées
+    computed: {
+        groupedExpenses() {
+            return this.$store.state.groupedExpenses; 
+        },
+        expensesList() {
+            return this.$store.state.expensesList;
+        },
+        total() {
+            return this.$store.state.total;
+        },
+        removedExpenseId() {
+            return this.$store.state.removedExpense;
+        },
+        error() {
+            return this.$store.state.error;
+        },
     },
-    methods: {
-    }
-  }
+    watch: {},
+    methods: {}
+}
 </script>
 
 <style>
