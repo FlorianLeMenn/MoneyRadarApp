@@ -1,34 +1,54 @@
-const { Op } = require('sequelize')
-const {startOfWeek, lastDayOfWeek} = require('date-fns');
+const { Op, Sequelize } = require('sequelize')
+const {startOfWeek, lastDayOfWeek, startOfMonth, lastDayOfMonth, lastDayOfYear, startOfYear } = require('date-fns');
 
 module.exports = {
     async getAll(req, res) {
       try {
+        
+        //default week
+        let startedDate = startOfWeek(new Date(), { weekStartsOn: 1 });
+        let endDate     = lastDayOfWeek(new Date(), { weekStartsOn: 1 });
+        let periodParam = 'day';
+
+        if(req.params.period && req.params.period === "month") {
+          startedDate = startOfMonth(new Date());
+          endDate     = lastDayOfMonth(new Date());
+          periodParam = 'month';
+        }
+        if(req.params.period && req.params.period === "year") {
+          startedDate = startOfYear(new Date());
+          endDate     = lastDayOfYear(new Date());
+          periodParam = 'year';
+        }
+
         // Grâce au middleware utiliser juste avant mon controller, le model de ma route est stocké dans la propriété Model de mon objet req.
         let options = {
-          //offset: 5, 
-          limit: 5,
+          ...(req.params.period && { attributes: [
+            [ Sequelize.fn('date_trunc', periodParam, Sequelize.col('date')), `date_alias`],
+            [ Sequelize.fn('sum', Sequelize.col('cost')), 'total']
+          ]}),
+          ...(req.params.period &&  {group: ['date_alias']}),
           where: {
             date: {
-              [Op.gte]: startOfWeek(new Date(), { weekStartsOn: 1 }),
-              [Op.lt]: lastDayOfWeek(new Date(), { weekStartsOn: 1 }),
+              [Op.between] : [startedDate, endDate],
+              //[Op.gte]: startedDate,
+              //[Op.lt]: endDate,
             }
           },
-          order: [
-          // Will escape full_name and validate DESC against a list of valid direction parameters
-          ['date', 'DESC']],
-          include: {
-            association: 'taxonomies',
-            attributes: ['id'],
-            through: {
-              attributes: []
-            }    
-          }
-          
+          ...(!req.params.period && {order: [
+            ['date', 'ASC']
+          ]}),
+          ...(!req.params.period && {include: {
+              association: 'taxonomies',
+              attributes: ['id'],
+              through: {
+                attributes: []
+              }    
+            }
+          }),
         };
-        
+
         const data = await req.Model.findAll(options);
-  
         res.json(data);
       } catch (err) {
         res.status(500).send(err);
