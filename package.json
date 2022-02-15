@@ -9,6 +9,7 @@
     "express-session": "^1.17.2",
     "jsdoc": "^3.6.7",
     "multer": "^1.4.3",
+    "nodemon": "^2.0.15",
     "pg": "^8.7.1",
     "pg-hstore": "^2.3.4",
     "sanitizer": "^0.1.3",

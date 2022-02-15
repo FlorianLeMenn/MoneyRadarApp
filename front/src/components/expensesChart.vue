@@ -25,50 +25,35 @@ export default {
         //console.log('CREATED CHART');
         Chart.register(...registerables);
     },
-    mounted() {
-    },
     updated() {
-        console.dir( 'DATA UP:');
-        console.dir( this.test);
-        //const data = myChart.loadDataChart(this.getTotalByDays, 'week');
-        //const configLineChart = myChart.setConfChart(data)
+        const data = myChart.loadDataChart(this.getTotalByDays, 'week');
+        const configLineChart = myChart.setConfChart(data)
         //create chart
-        //const myLineChart = new Chart(document.getElementById('chartLine'),configLineChart);
+        const myLineChart = new Chart(document.getElementById('chartLine'),configLineChart);
         //init chart 
-        //myChart.init(myLineChart);
+        myChart.init(myLineChart);
     },
     computed: {
-        test() {
-             const data = this.$props.groupedExpenses;
-            console.log('== groupedExpenses ==')
-            console.dir( data);
-            console.log('== each interval days ==')
-            //default week
-            const startedDate   = startOfWeek(new Date(), { weekStartsOn: 1 });
-            const endDate       = lastDayOfWeek(new Date(), { weekStartsOn: 1 });
-
-            let currentTotal    = 0;
-            let sumData         = [];
-
+        //Retourn un tableau des dépenses totales triées par jours
+        getTotalByDays() {
+            const data = this.$props.groupedExpenses;
+            //default week star monday
+            const startedDate = startOfWeek(new Date(), { weekStartsOn: 1 });
+            const endDate     = lastDayOfWeek(new Date(), { weekStartsOn: 1 });
+            //week interval
             const result = eachDayOfInterval({
                 start: startedDate,
                 end: endDate
             })
-            console.log('=== formated ====') 
-            const timeZone = 'Europe/Paris'
+            //Format ISO day of week 
+            const allDays    = result.map(el => el = format(el, 'i'));
+            const dataByDays = data.map(el => el = format(new Date(el.date_alias), 'i'));
 
-            const currentW = result.map(el => el = format(el, 'i'));
-            const formatedW = data.map(el =>el.date_alias);
-            console.log(currentW);
-            console.log(formatedW);
-            const date2 = new Date('2022-02-06T00:00:00.000Z')
-            const zonedDate = utcToZonedTime(date2, timeZone)
-            console.log(zonedDate)
-            //return this.$props.groupedExpenses;
+            const intersection = allDays.map(function(day) {
+                return dataByDays.includes(day) ? data[dataByDays.indexOf(day)].total : 0;
+            });
+            return (intersection);
         },
-        //Retourn un tableau des dépenses totales triées par jours
-        getTotalByDays() {}
-
     },
 }
 </script>

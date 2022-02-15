@@ -467,6 +467,7 @@ export default {
 
         getDateValue(date) {
             let selectedDate = new Date(this.year, this.month, date);
+            selectedDate.setHours(20);
             this.datepickerValue = selectedDate.toDateString();
 
             //this.newExpense.date = selectedDate.toISOString();

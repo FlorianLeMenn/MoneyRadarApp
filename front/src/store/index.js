@@ -60,8 +60,6 @@ export default createStore( {
                 }
                 else {
                     commit('loadExpenses', financeList.data);
-                    console.log('loadExpenses');
-                    console.log(financeList.data);
                 }
             } catch (error) {
                 commit('updateError', error);
