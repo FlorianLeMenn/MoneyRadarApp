@@ -236,7 +236,7 @@
                 </div>
                 <!-- END date picker -->
                 <div class="flex flex-row items-center justify-between py-2">
-                    <button class="px-4 py-2 text-white font-semibold bg-red text-white text-sm uppercase rounded">
+                    <button type="button" class="cancelBtn px-4 py-2 text-white font-semibold bg-red text-white text-sm uppercase rounded">
                         Annuler
                     </button>
                     <button type="submit" class="px-4 py-2 text-white font-semibold bg-blue text-white text-sm uppercase rounded">
@@ -309,14 +309,20 @@ export default {
     methods: {
         onSubmit(e) {
             e.preventDefault() // don't perform submit action (i.e., `<form>.action`)
-            if(this.newExpense.taxonomies === 'undefined') {
-                this.$store.dispatch('setError', 'La catégorie n\'est pas renseignée.');
+            if(this.newExpense.title === undefined) {
+                this.$store.dispatch('setError', 'Le titre n\'est pas renseignée.');
+                return;
             }
-            if (this.newExpense.recurrent) {
+            else if(this.newExpense.taxonomies === undefined) {
+                this.$store.dispatch('setError', 'La catégorie n\'est pas renseignée.');
+                return;
+            }
+            else if (this.newExpense.recurrent) {
                 this.addRecurrentExpense();
             }
-            this.addExpense();
-            this.$store.dispatch('loadExpenses');
+            else {
+                this.addExpense();
+            }
         },
         async addRecurrentExpense() {
             try {
@@ -386,6 +392,8 @@ export default {
                 }
 
                 this.message = 'Dépense crée';
+                this.$store.dispatch('loadAllExpenses');
+                this.$store.dispatch('loadExpenses');
 
             } catch (error) {
                 this.$store.dispatch('setError', error);

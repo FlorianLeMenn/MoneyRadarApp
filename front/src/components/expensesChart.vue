@@ -8,52 +8,30 @@
             <div class=" overflow-hidden">
                 <canvas class="" id="chartLine"></canvas>
             </div>
-        </div>
+        </div> 
 </template>
 
 <script>
 import { Chart, registerables} from 'chart.js';
 import myChart from '../assets/js/chart.js';
-import {getDay, startOfWeek, lastDayOfWeek, startOfMonth, lastDayOfMonth, eachDayOfInterval,formatISO, parseISO, format } from 'date-fns';
-import  { utcToZonedTime } from 'date-fns-tz';
 
 export default {
-  name: 'expensesChart',
+    name: 'expensesChart',
     //propriété de donnée du parent, passage en attribut html
-  props: ['groupedExpenses'],
+    props: ['groupedExpenses'],
     created() {
         //console.log('CREATED CHART');
         Chart.register(...registerables);
     },
-    updated() {
-        const data = myChart.loadDataChart(this.getTotalByDays, 'week');
+    mounted() {
+        console.log('mouted');
+        console.log(this.$props.groupedExpenses);
+        const data = myChart.loadDataChart(this.$props.groupedExpenses, 'week');
         const configLineChart = myChart.setConfChart(data)
         //create chart
         const myLineChart = new Chart(document.getElementById('chartLine'),configLineChart);
         //init chart 
         myChart.init(myLineChart);
-    },
-    computed: {
-        //Retourn un tableau des dépenses totales triées par jours
-        getTotalByDays() {
-            const data = this.$props.groupedExpenses;
-            //default week star monday
-            const startedDate = startOfWeek(new Date(), { weekStartsOn: 1 });
-            const endDate     = lastDayOfWeek(new Date(), { weekStartsOn: 1 });
-            //week interval
-            const result = eachDayOfInterval({
-                start: startedDate,
-                end: endDate
-            })
-            //Format ISO day of week 
-            const allDays    = result.map(el => el = format(el, 'i'));
-            const dataByDays = data.map(el => el = format(new Date(el.date_alias), 'i'));
-
-            const intersection = allDays.map(function(day) {
-                return dataByDays.includes(day) ? data[dataByDays.indexOf(day)].total : 0;
-            });
-            return (intersection);
-        },
     },
 }
 </script>

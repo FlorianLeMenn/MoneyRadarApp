@@ -1,5 +1,5 @@
 import { createStore } from 'vuex'
-import { format } from 'date-fns'
+import {startOfWeek, lastDayOfWeek, eachDayOfInterval, format } from 'date-fns';
 import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
@@ -12,7 +12,24 @@ export default createStore( {
     },
     mutations: {
         loadExpenses(state, groupedExpenses) {
-            state.groupedExpenses = groupedExpenses;
+            console.log(' up state expenses');
+            //default week star monday
+            const startedDate = startOfWeek(new Date(), { weekStartsOn: 1 });
+            const endDate     = lastDayOfWeek(new Date(), { weekStartsOn: 1 });
+            //week interval
+            const result = eachDayOfInterval({
+                start: startedDate,
+                end: endDate
+            })
+            //Format ISO day of week 
+            const allDays    = result.map(el => el = format(el, 'i'));
+            const dataByDays = groupedExpenses.map(el => el = format(new Date(el.date_alias), 'i'));
+
+            const intersection = allDays.map(function(day) {
+                return dataByDays.includes(day) ? groupedExpenses[dataByDays.indexOf(day)].total : 0;
+            });
+            state.groupedExpenses = intersection;
+            console.log(state.groupedExpenses);
         },
         loadAllExpenses(state, expensesList) {
             state.expensesList = expensesList;
@@ -96,5 +113,10 @@ export default createStore( {
             commit('updateError', error);
         }
     },
+    getters: {
+        loadExpenses (state) {
+            return (state.groupedExpenses);
+        }
+    }
 
 });

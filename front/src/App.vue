@@ -16,7 +16,7 @@
     </div>
 
     <add-expense-form></add-expense-form> 
-         {{error}}
+
     <expense-list :expensesList="expensesList" ></expense-list>
         <div class="mt-4 py-2 mx-auto max-w-sm flex flex-row items-center justify-around bg-gray">
         <div class="menu-item hover:bg-gray-dark">
@@ -53,8 +53,8 @@
 <script>
     import expensesChart from './components/expensesChart.vue'
     import addExpenseForm from './components/addExpenseForm.vue'
-    import main from './assets/js/main.js';
     import expenseList from './components/expenseList.vue';
+    import main from './assets/js/main.js';
 
     export default {
     components: {
@@ -62,7 +62,9 @@
         addExpenseForm,
         expenseList
     },
-    created() {this.$store.dispatch('loadExpenses');},
+    beforeCreate() {
+                this.$store.dispatch('loadExpenses');
+    },
     mounted() {
         //l'app est load
         main.init();
