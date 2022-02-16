@@ -2,6 +2,7 @@ const main = {
     init: function() {
         const displayForm     = document.querySelector('.addNewForm');
         const btnAdd          = document.querySelector('.addNewBtn');
+        const btnCancel       = document.querySelector('.cancelBtn');
         const checkRecurrent  = document.getElementById('checkRecurrent');
         const fieldsContainer = document.getElementById('recurrentFieldsContainer');
 
@@ -12,11 +13,15 @@ const main = {
             else {
                 fieldsContainer.classList.toggle('hidden');
             }
-        })
+        });
         
         btnAdd.addEventListener('click', (event) => {
             displayForm.classList.toggle('hidden');
-        })
+        });
+        
+        btnCancel.addEventListener('click', (e) => {
+            displayForm.classList.toggle('hidden');
+        });
     }
 }
 
