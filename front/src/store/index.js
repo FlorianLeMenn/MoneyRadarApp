@@ -12,7 +12,6 @@ export default createStore( {
     },
     mutations: {
         loadExpenses(state, groupedExpenses) {
-            console.log(' up state expenses');
             //default week star monday
             const startedDate = startOfWeek(new Date(), { weekStartsOn: 1 });
             const endDate     = lastDayOfWeek(new Date(), { weekStartsOn: 1 });
@@ -29,7 +28,6 @@ export default createStore( {
                 return dataByDays.includes(day) ? groupedExpenses[dataByDays.indexOf(day)].total : 0;
             });
             state.groupedExpenses = intersection;
-            console.log(state.groupedExpenses);
         },
         loadAllExpenses(state, expensesList) {
             state.expensesList = expensesList;
@@ -90,6 +88,8 @@ export default createStore( {
                     commit('updateError', 'Impossible de supprimer la dépense: ' + expenseId);
                 }
                 commit('removeExpense', expenseId);
+                this.dispatch('loadExpenses');
+                this.dispatch('loadExpensesTotal');
 
             } catch (error) {
                 commit('updateError', error);
@@ -102,9 +102,11 @@ export default createStore( {
                 if (!financeList) {
                     commit('updateError', 'Impossible de trouver le total pour la periode: ' + period);
                 }
-                const total = financeList.data.map(el => +el.total).reduce((prev, next) => prev + next);
-                commit('loadExpensesTotal', total);
-
+                if(financeList.data.length > 0)
+                {
+                    const total = financeList.data.map(el => +el.total).reduce((prev, next) => prev + next);
+                    commit('loadExpensesTotal', total);  
+                }
             } catch (error) {
                 commit('updateError', error);
             }

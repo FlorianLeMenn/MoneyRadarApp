@@ -249,8 +249,7 @@
 </template>
 
 <script>
-import {addDays, addWeeks, addMonths, addYears, toDate, getTime, parseISO, lastDayOfYear,differenceInMonths, differenceInWeeks, differenceInDays} from 'date-fns';
-import  { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
+import {addWeeks, addMonths, parseISO, lastDayOfYear,differenceInMonths, differenceInWeeks} from 'date-fns';
 import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
@@ -292,7 +291,7 @@ export default {
                 recurrent: false,
                 interval: 0,
                 periodicity: 0,
-                date: undefined,
+                date: new Date().toISOString(),
                 taxonomies: undefined,
             }
         };
@@ -311,6 +310,10 @@ export default {
             e.preventDefault() // don't perform submit action (i.e., `<form>.action`)
             if(this.newExpense.title === undefined) {
                 this.$store.dispatch('setError', 'Le titre n\'est pas renseignée.');
+                return;
+            }
+            else if(this.newExpense.date === undefined) {
+                this.$store.dispatch('setError', 'La date n\'est pas renseignée.');
                 return;
             }
             else if(this.newExpense.taxonomies === undefined) {
@@ -384,16 +387,16 @@ export default {
 
         async addExpense() {
             try {
-                console.log(this.newExpense);
-                
                 const message = await axios.post(`/finance`, this.newExpense);
                 if (!message) {
                     this.$store.dispatch('setError', 'Impossible de créer la dépense');
                 }
 
                 this.message = 'Dépense crée';
-                this.$store.dispatch('loadAllExpenses');
                 this.$store.dispatch('loadExpenses');
+                this.$store.dispatch('loadAllExpenses');
+                this.$store.dispatch('loadExpensesTotal');
+                
 
             } catch (error) {
                 this.$store.dispatch('setError', error);
@@ -418,8 +421,7 @@ export default {
                 this.categoriesList = hierarchy;
 
             } catch (error) {
-                console.log(error);
-                this.error = error.response;
+                this.$store.dispatch('setError', error);
             }
         },
 
@@ -431,8 +433,7 @@ export default {
                 }
 
             } catch (error) {
-                console.log(error);
-                this.error = error.response;
+                this.$store.dispatch('setError', error);
             }
         },
 
@@ -440,7 +441,7 @@ export default {
             let today     = new Date();
             this.month    = today.getMonth();
             this.year     = today.getFullYear();
-            this.datepickerValue = new Date()//.toDateString(); 
+            this.datepickerValue = new Date().toDateString(); 
         },
 
         getNoOfDays() {
@@ -475,14 +476,9 @@ export default {
 
         getDateValue(date) {
             let selectedDate = new Date(this.year, this.month, date);
-            selectedDate.setHours(20);
             this.datepickerValue = selectedDate.toDateString();
+            this.newExpense.date = selectedDate.toISOString();
 
-            //this.newExpense.date = selectedDate.toISOString();
-            const utcDate = zonedTimeToUtc(selectedDate, 'Europe/Paris')
-            console.log(selectedDate.toDateString());
-            console.log(utcDate);
-            this.newExpense.date = utcDate
             this.$refs.date.value =
                 selectedDate.getFullYear() +
                 "-" +

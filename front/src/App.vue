@@ -8,7 +8,9 @@
             <div class="mb-2 text-base">Total dépenses</div>
             <p class="text-gray-500 text-2xl">{{ total }}</p>
         </div>
+        <div v-if="groupedExpenses && groupedExpenses.length">
             <expensesChart :groupedExpenses="groupedExpenses" />
+        </div>
     </div>
     <div class="m-2 max-w-sm mx-auto flex text-center">
         <a href="#" class="addNewBtn p-4 grow max-w rounded-xl bg-blue text-white text-sm uppercase">Ajouter une
@@ -62,12 +64,10 @@
         addExpenseForm,
         expenseList
     },
-    beforeCreate() {
-                this.$store.dispatch('loadExpenses');
-    },
     mounted() {
         //l'app est load
         main.init();
+        this.$store.dispatch('loadExpenses');
         this.$store.dispatch('loadAllExpenses');
         this.$store.dispatch('loadExpensesTotal');
     },

@@ -8,7 +8,8 @@
             <div class=" overflow-hidden">
                 <canvas class="" id="chartLine"></canvas>
             </div>
-        </div> 
+        </div>
+
 </template>
 
 <script>
@@ -19,19 +20,36 @@ export default {
     name: 'expensesChart',
     //propriété de donnée du parent, passage en attribut html
     props: ['groupedExpenses'],
+    data() {
+        chart: undefined
+        return {}
+    },
     created() {
-        //console.log('CREATED CHART');
         Chart.register(...registerables);
     },
     mounted() {
-        console.log('mouted');
-        console.log(this.$props.groupedExpenses);
-        const data = myChart.loadDataChart(this.$props.groupedExpenses, 'week');
-        const configLineChart = myChart.setConfChart(data)
-        //create chart
-        const myLineChart = new Chart(document.getElementById('chartLine'),configLineChart);
-        //init chart 
-        myChart.init(myLineChart);
+        this.createChart('week');
+    },
+    updated() {
+        this.updateChart('week');
+    },
+    methods: {
+        createChart(period) {
+            const data = myChart.loadDataChart(this.$props.groupedExpenses, period);
+            const conf = myChart.setConfChart(data)
+            //create chart
+            const chart = new Chart(document.getElementById('chartLine'),conf);
+            //init chart 
+            this.chart = chart;
+            myChart.init(chart);
+        },
+        updateChart(period) {
+            //load new data
+            const data = myChart.loadDataChart(this.$props.groupedExpenses, period);
+            //update conf
+            myChart.setConfChart(data)
+            myChart.updateDataChart(this.chart, data);
+        }
     },
 }
 </script>
