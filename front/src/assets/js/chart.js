@@ -1,6 +1,5 @@
 const chart = {
     init:  function(myLineChart) {
-        console.log("INIT");
         //get item selected
         const chartNav = document.querySelector('.chart-nav');
     
@@ -35,7 +34,12 @@ const chart = {
             myLineChart.update();
         });
     },
-    
+    updateDataChart: function(chart, data){
+        chart.data = data;
+        chart.options.scales.yAxis.max = Math.max(...data.datasets[0].data);
+        chart.update();
+    },
+
     loadDataChart: function(dataChart = null, period = 'week') {
         const today = new Date();
         const month = today.getMonth();
