@@ -1,6 +1,6 @@
 const {Sequelize} = require('sequelize');
 
-const sequelize = new Sequelize('postgres://moneyapp:moneyapp@localhost:5432/moneyapp', {
+const sequelize = new Sequelize(process.env.PG_URL, {
     logging: true,
     dialectOptions: {
         useUTC: false, //for reading from database
