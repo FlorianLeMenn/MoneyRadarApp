@@ -7,6 +7,7 @@ const Habit     = require('./habit');
 const List      = require('./list');
 const Task      = require('./task');
 const Tag       = require('./tag');
+const Mood       = require('./mood');
 
 //Mes finances peuvent avoit 0 ou N Taxonomy
 Finance.belongsToMany(Taxonomy,{ 
@@ -156,4 +157,4 @@ User.hasMany(Goal, {
     foreignKey: 'user_id'
 })
 
-module.exports = { User, Taxonomy, Vocabulary, Finance, Goal, Habit, Task, Tag, List };
+module.exports = { User, Taxonomy, Vocabulary, Finance, Goal, Habit, Task, Tag, List, Mood };

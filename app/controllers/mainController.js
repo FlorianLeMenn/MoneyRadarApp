@@ -48,8 +48,15 @@ module.exports = {
           }),
         };
 
-        const data = await req.Model.findAll(options);
-        res.json(data);
+        if(req.Model.name != 'Finance') {
+          const data = await req.Model.findAll();
+          res.json(data);
+        }
+        else{
+          const data = await req.Model.findAll(options);
+          res.json(data);
+        }
+        
       } catch (err) {
         res.status(500).send(err);
       }

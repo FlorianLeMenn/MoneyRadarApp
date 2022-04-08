@@ -1,11 +1,12 @@
 import { createStore } from 'vuex'
-import {startOfWeek, lastDayOfWeek, eachDayOfInterval, format } from 'date-fns';
+import {startOfWeek, lastDayOfWeek, eachDayOfInterval, format, parseISO, getDaysInMonth, getDate} from 'date-fns';
 import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
 export default createStore( {
     state: {
         expensesList: [],
+        moodList: [],
         groupedExpenses: [],
         total: 0,
         error: '',
@@ -32,6 +33,24 @@ export default createStore( {
         loadAllExpenses(state, expensesList) {
             state.expensesList = expensesList;
         },
+        loadAllMoods(state, moodList) {
+            //https://stackoverflow.com/questions/49627157/update-the-attribute-value-of-an-object-using-the-map-function-in-es6
+            const mood = moodList.map( ({ date, ...list }) => {
+                return {...list, date: format(parseISO(date), 'd')};
+            });
+            const date = new Date();
+            
+            let days = []
+            for (let index = 1; index <= getDaysInMonth(date); index++) {
+                const data = mood.find( el => +el.date == index)
+                
+                if(data)
+                    days.push(data);
+                else
+                    days.push({'id': '', 'mood':'', 'description': '', 'date': index});
+            }
+            state.moodList = days;
+        },
         removeExpense(state, expenseId) {
             const updateExpensesList = state.expensesList.filter(el => expenseId != el.id);
             state.expensesList = updateExpensesList;
@@ -47,6 +66,22 @@ export default createStore( {
         //load finances infos
         //appeler l'action par la methode dispatch
         //appeler la mutation par la methode commit
+        async loadAllMoods({ commit }) {
+            try {
+                const moodList = await axios.get(`/mood`);
+                if (!moodList.data) {
+                    commit('updateError','Impossible de récupérer les moods');
+                }
+                if (!moodList.data.length) {
+                    commit('updateError','Aucun mood');
+                }
+                else {
+                    commit('loadAllMoods', moodList.data);
+                }
+            } catch (error) {
+                commit('updateError', error);
+            }
+        },
         async loadAllExpenses({ commit }) {
             try {
                 const financeList = await axios.get(`/finance`);
