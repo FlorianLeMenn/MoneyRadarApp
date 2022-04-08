@@ -254,18 +254,18 @@ import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
     const MONTH_NAMES = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
+        "Janvier",
+        "Février",
+        "Mars",
+        "Avril",
+        "Mai",
+        "Juin",
+        "Juillet",
+        "Aout",
+        "Septembre",
+        "Octobre",
+        "Novembre",
+        "Décembre",
     ];
 
     const DAYS = ["Dim","Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
