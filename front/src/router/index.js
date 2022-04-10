@@ -3,6 +3,7 @@ import App from '../App.vue'
 import MoodBoard from '../views/MoodBoard'
 import Home from '../views/Home'
 import Finances from '../views/Finances'
+import TodoList from '../views/TodoList'
 
 const routes = [
     {
@@ -20,6 +21,11 @@ const routes = [
         name: 'moodboard',
         component: MoodBoard 
     },
+    { 
+        path: '/todolist', 
+        name: 'todolist',
+        component: TodoList 
+    }
 ]
 
 const router = createRouter({
