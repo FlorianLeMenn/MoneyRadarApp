@@ -7,7 +7,7 @@ const chart = {
             const period = e.target.dataset.item;
             const classes = ["selected", "py-1", "px-4" ,"text-white" ,"rounded-full", "bg-gray-light"];
 
-            console.log("periode" + period);
+            //console.log("periode" + period);
     
             if(period === undefined) {return;}
     

@@ -46,21 +46,19 @@
                 type="text" 
                 name="description" 
                 placeholder="La raison de votre état émotionnel..."
-                class="w-full p-2 mb-5 mt-5 bg-gray-dark rounded shadow-sm" id="" 
+                class="w-full p-2 mb-5 mt-5 bg-gray-dark rounded shadow-sm" 
             />
             <input 
                 v-model="newMood.mood" 
                 type="hidden" 
                 name="mood" 
-                placeholder="La raison de votre état émotionnel..."
-                class="p-2 mb-5 bg-gray-dark rounded shadow-sm" id="" 
+                class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
             />
             <input 
                 v-model="newMood.date" 
                 type="hidden" 
                 name="date" 
-                placeholder="La raison de votre état émotionnel..."
-                class="p-2 mb-5 bg-gray-dark rounded shadow-sm" id="" 
+                class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
             />
             
             <div class="flex flex-row items-center justify-between py-2">
@@ -106,8 +104,6 @@ export default {
             e.preventDefault() // don't perform submit action (i.e., `<form>.action`)
             if(this.newMood.description === '') {
                 this.$store.dispatch('setError', 'La description n\'est pas renseignée.');
-                //this.error = ('setError', 'La description n\'est pas renseignée2.');
-                //console.log('vide')
                 return;
             }
             else if(this.newMood.mood === '') {
@@ -149,7 +145,7 @@ export default {
         async addMood() {
             try {
                 const message = await axios.post(`/mood`, this.newMood);
-                console.log(message);
+
                 if (!message) {
                     this.$store.dispatch('setError', 'Impossible de créer le mood');
                 }
@@ -161,7 +157,6 @@ export default {
             }
         }
     },
-     //prorietes calculées
     computed: {
         moodList() {
             return this.$store.state.moodList; 
@@ -174,7 +169,7 @@ export default {
 </script>
 
 <style>
-input[type="range"] {
+.moodboard input[type="range"] {
     display: inline;
     -webkit-appearance: none;
     height: 10px;
@@ -198,7 +193,7 @@ input[type="range"] {
 
 }
 
-input[type=range]::-webkit-slider-thumb {
+.moodboard input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     background: rgb(41, 43, 77);
     border: 2px solid rgb(53 55 102 );
@@ -219,13 +214,13 @@ input[type=range]::-webkit-slider-runnable-track {
     border-top: 1px solid #414376;
     border-left: 1px solid #414376;
 }
-.day {
+.moodboard .day {
     padding: 10px;
     border-bottom: 1px solid #414376;
     border-right: 1px solid #414376;
     text-align: center;
 }
-.today {
+.moodboard .today {
     background: #414376;
 }
 
