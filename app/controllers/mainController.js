@@ -20,6 +20,7 @@ module.exports = {
           endDate     = lastDayOfYear(new Date());
           periodParam = 'year';
         }
+        console.log(req.params)
 
         // Grâce au middleware utiliser juste avant mon controller, le model de ma route est stocké dans la propriété Model de mon objet req.
         let options = {
@@ -63,7 +64,7 @@ module.exports = {
     },
     async getOne(req, res, next) {
       try {
-        var categorizedModels = ['Vocabulary', 'Finance', 'Goal', 'List'];
+        var categorizedModels = ['Vocabulary', 'Finance', 'Goal', 'List', 'Task'];
         let options = {};
         const found = categorizedModels.includes(req.Model.name);
         if (found) {
