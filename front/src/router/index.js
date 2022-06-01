@@ -3,7 +3,7 @@ import App from '../App.vue'
 import MoodBoard from '../views/MoodBoard'
 import Home from '../views/Home'
 import Finances from '../views/Finances'
-import TodoList from '../views/TodoList'
+import TodoBoard from '../views/TodoBoard'
 
 const routes = [
     {
@@ -22,9 +22,9 @@ const routes = [
         component: MoodBoard 
     },
     { 
-        path: '/todolist', 
-        name: 'todolist',
-        component: TodoList 
+        path: '/todo', 
+        name: 'todoboard',
+        component: TodoBoard 
     }
 ]
 
