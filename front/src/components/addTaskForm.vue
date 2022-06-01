@@ -1,33 +1,25 @@
 <template>
-    <h1 class="mb-6 text-3xl max-w-sm mx-auto font-bold text-white text-center">
-        Todo list
-    </h1>
-    <div class="todolist p-6 max-w-sm mx-auto bg-gray rounded-xl shadow-lg flex flex-col ">
-        <h2  class="mb-6 text-l max-w-sm mx-auto font-bold text-white text-left" >{{title}}</h2>
-        <div class="period-nav m-4 flex justify-around items-center text-center text-gray1">
-            <div class="day selected py-1 px-2 text-white rounded-full bg-gray-light" data-item="day">Jour</div>
-            <div class="week" data-item="week">Semaine</div>
-            <div class="month" data-item="month">Mois</div>
-        </div>
-        <div class="container">
-
-        </div>
-
-        <div>
-            {{ this.$store.state.error }}
-        </div>
-
         <form 
             @submit="onSubmit"
             method="POST"
             action="http://localhost:3000/task"
         >
+
+        <div :class="listId">
+            <p class="mb-2 font-semibold text-gray1">Intitulé</p>
             <input 
-                v-model="newTask.name" 
+                v-model="newTask.title" 
                 type="text" 
                 name="description" 
                 placeholder="Nouvelle tache..."
-                class="w-full p-2 mb-5 mt-5 bg-gray-dark rounded shadow-sm" id="" 
+                class="w-full p-2 mb-5 bg-gray-dark rounded shadow-sm" id="" 
+            />
+            <input 
+                v-model="listId" 
+                type="text" 
+                name="liste" 
+                placeholder="ID liste"
+                class="w-full p-2 mb-5 bg-gray-dark rounded shadow-sm" id="" 
             />
             <div class="flex flex-col sm:flex-row items-center mb-5 sm:space-x-5">
                     <div class="w-full">
@@ -41,63 +33,69 @@
                         </select>
                     </div>               
                 </div>
-            <input 
-                v-model="newTask.finish" 
-                type="checkbox" 
-                name="mood" 
-                class="p-2 mb-5 bg-gray-dark rounded shadow-sm" id="" 
-            />
-            <input 
-                v-model="newTask.position" 
-                type="text" 
-                name="position" 
-                class="p-2 mb-5 bg-gray-dark rounded shadow-sm" id="" 
-            />
-            
-            <div class="flex flex-row items-center justify-between py-2">
-                <button type="submit" class="w-full px-4 py-2 text-white font-semibold bg-blue text-white text-sm uppercase rounded">
-                    Enregistrer
-                </button>
+
+            <div class="flex sm:flex-row items-baseline mb-5 sm:space-x-5">
+                <div class="w-2/3">
+                    <p class="mb-2 font-semibold text-gray1">Position</p>
+                    <input 
+                        v-model="newTask.position" 
+                        type="number" 
+                        name="position" 
+                        class="p-2 mb-5 bg-gray-dark rounded shadow-sm" id="" 
+                    />
+                </div>
+                <div class="w-1/3">
+                    <input 
+                        v-model="newTask.finish" 
+                        type="checkbox" 
+                        name="finish" 
+                        class="p-2 mb-5 bg-gray-dark rounded shadow-sm" id="checkFinish" 
+                    />
+                    <label class="p-2 form-check-label inline-block text-gray1" for="checkFinish">Terminé</label>
+                </div>
             </div>
 
+                <div class="flex flex-row items-center justify-between py-2">
+                    <button type="button" class="cancelBtn px-4 py-2 text-white font-semibold bg-red text-white text-sm uppercase rounded">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-white font-semibold bg-blue text-white text-sm uppercase rounded">
+                        Enregistrer
+                    </button>
+                </div>
+        </div>
         </form>
-    </div>
 </template>
-
 <script>
-import {format, getDate , getDaysInMonth, parseISO} from 'date-fns';
-import { enUS, fr } from 'date-fns/esm/locale'
-import nav from '../assets/js/period-nav.js';
+
 import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
-
 export default {
-    name: 'TodoList',
+    name: 'addTaskForm',
+    props: ['allTaskList', 'listId'],
     data() {
         return {
-            title: format(new Date(), 'EEEE c MMMM', {locale: fr}),
-            currentday: getDate(new Date()),
+            message: '',
+            error: '',
+            counter: 0,
             newTask: {
-                name: '',
+                title: '',
                 finish: 0,
                 position: 0,
                 taxonomies: undefined,
-            }
+                list_id: this.listId,
+            },
         };
     },
-    created() {
-    },
     mounted() {
-        nav.init();
-        this.$store.dispatch('loadAllTasks');
-    },
-    updated() {
+        this.initCategories();
     },
     methods: {
         onSubmit(e) {
+            this.newTask.list_id = this.listId;
             e.preventDefault() // don't perform submit action (i.e., `<form>.action`)
-            if(this.newTask.name === '') {
+            if(this.newTask.title === '') {
                 this.$store.dispatch('setError', 'La description n\'est pas renseignée.');
                 return;
             }
@@ -111,7 +109,7 @@ export default {
         },
         async initCategories() {
             try {
-                const {data} = await axios.get(`/vocabulary/2`);
+                const {data} = await axios.get(`/vocabulary/5`);
                 if (!data.taxonomies) {
                     this.message = 'Impossible de trouver les catégories';
                 }
@@ -126,6 +124,7 @@ export default {
                 });
 
                 this.categoriesList = hierarchy;
+                
 
             } catch (error) {
                 this.$store.dispatch('setError', error);
@@ -142,8 +141,10 @@ export default {
                 this.$store.dispatch('setError', error);
             }
         },
+
         async addTask() {
             try {
+                console.log(this.newTask)
                 const message = await axios.post(`/task`, this.newTask);
 
                 if (!message) {
@@ -156,14 +157,6 @@ export default {
                 this.$store.dispatch('setError', error);
             }
         }
-    },
-    computed: {
-        TodoList() {
-            return this.$store.state.TodoList; 
-        },
-        error() {
-            return this.$store.state.error;
-        },
     },
 }
 </script>
