@@ -7,11 +7,11 @@
         <div class="container">
             <div 
             @click="setMood((index + 1), $event)" 
-            v-for="mood in moodList" :value="mood.id" :key="mood.id" 
-            :class="[ mood.date == currentday ? 'today' : '' ] + ' day day-' + mood.date"
-            :style="'background: '+ [ mood.mood ? mood.mood : '' ] "
+            v-for="moodDay in moodList" :value="moodDay.id" :key="moodDay.id" 
+            :class="[ moodDay.date == currentday ? 'today' : '' ] + ' day day-' + moodDay.date"
+            :style="'background: '+ [ moodDay.mood ? moodDay.mood : '' ] "
             >
-                {{ mood.date }}
+                {{ moodDay.date }} <span>{{ moodDay.description }}</span>
             </div>
         </div>
 
@@ -96,8 +96,6 @@ export default {
     },
     mounted() {
         this.$store.dispatch('loadAllMoods');
-    },
-    updated() {
     },
     methods: {
         onSubmit(e) {
