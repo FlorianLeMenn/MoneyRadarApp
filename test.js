@@ -79,9 +79,43 @@ const run = async () => {
             ],
         },
     ];
-    const habits    = ['Ranger chambre', 'lire les mails', 'pompes'];
+
+    const tasks    = 
+    [
+        { text: 'Organisation', value: 0, children:
+            [
+                { text: 'Nettoyage', value: 1 },
+                { text: 'Rangement', value: 2 },
+                { text: 'Repas', value: 3 },
+                { text: 'Courses', value: 4 },
+                { text: 'Voiture', value: 5 },
+            ],
+        },
+        { text: 'Administratif', value: 6, children:
+            [
+                { text: 'Factures', value: 7 },
+                { text: 'Trie/classement', value: 8 },
+                { text: 'Téléphone', value: 9 },
+            ],
+        },
+        { text: 'Travail', value: 10, children:
+            [
+                { text: 'Travail 1', value: 11 },
+                { text: 'Projet perso', value: 12 },
+            ],
+        },
+        { text: 'Routine', value: 13, children:
+            [
+                { text: 'Routine 1', value: 14 },
+                { text: 'Routine 2', value: 15 },
+                { text: 'Routine 3', value: 16 },
+                { text: 'Routine 4', value: 17 },
+            ],
+        },
+    ];
+
     const goals     = ['Clean', 'Faire du sport'];
-    const tasks     = ['faire les courses', 'appeler mamie', 'vendre tv'];
+    const habits     = ['Dormir', 'Sport', 'vendre tv'];
 
     const tag = await Tag.create({
         name: 'Best of the world',
@@ -125,12 +159,25 @@ const run = async () => {
     console.log("==== TAXO TACHES ====");
     for (const taxo of tasks) {
         const newTaxo = await Taxonomy.create({
-            name: taxo,
+            name: taxo.text,
             description: '',
             weight: 0,
             vid: 5,
         })
         console.log("----" + newTaxo.name + ' [' + newTaxo.id + ']')
+        //create children
+        if (taxo.children) {
+            for (const [index, child] of taxo.children.entries()) {
+            const newChildTaxo = await Taxonomy.create({
+                name: child.text,
+                weight: index,
+                vid: 5,
+                parent: newTaxo.id,
+            })
+            console.log("--------" + newChildTaxo.name + ' [' + newChildTaxo.id + ']')
+        }
+        }
+        console.log("===============");
     }
 
      //creation des taxo dépense
@@ -174,14 +221,14 @@ const run = async () => {
     //Ajout de la catégorie corvée
     await newList.addTaxonomy(6);
 
-    console.log("==== CREATION TACHES ====");
-    for (const task of tasks) {
-        const newTask = await Task.create({
-            title: task,
-            list_id: newList.id,
-        })
-        console.log("-------" + newTask.title)
-    }
+    // console.log("==== CREATION TACHES ====");
+    // for (const task of tasks) {
+    //     const newTask = await Task.create({
+    //         title: task,
+    //         list_id: newList.id,
+    //     })
+    //     console.log("-------" + newTask.title)
+    // }
 
     const newUser = await User.create({
         username: 'Florian',
