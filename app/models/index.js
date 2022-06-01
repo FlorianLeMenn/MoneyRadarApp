@@ -45,6 +45,18 @@ List.belongsToMany(Taxonomy,{
     timestamps: false
 });
 
+//Mes tâches peuvent avoit 0 ou N Taxonomy
+Task.belongsToMany(Taxonomy,{ 
+    as: 'taxonomies',
+    through: 'task_has_taxonomy',
+    foreignKey: {
+        name: 'task_id', // nom du champs de la clef etrangère
+        allowNull: false, //rendre obligatoire l'association
+    },
+    otherKey: 'tid',
+    timestamps: false
+});
+
 // la taxo dépend d'un vocabulaire
 Vocabulary.hasMany(Taxonomy,{ 
     as: 'taxonomies',
@@ -106,6 +118,18 @@ Taxonomy.belongsToMany(Finance,{
         allowNull: false, //rendre obligatoire l'association
     },
     otherKey: 'finance_id',
+    timestamps: false
+});
+
+//Mes tâches peuvent avoit 0 ou N Categorie
+Taxonomy.belongsToMany(Task,{ 
+    as: 'tasks',
+    through: 'task_has_taxonomy',
+    foreignKey: {
+        name: 'tid', // nom du champs de la clef etrangère
+        allowNull: false, //rendre obligatoire l'association
+    },
+    otherKey: 'task_id',
     timestamps: false
 });
 
