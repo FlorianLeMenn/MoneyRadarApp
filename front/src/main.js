@@ -3,7 +3,7 @@ import App from './App.vue'
 import '@/assets/css/tailwind.css' //@en vue pointe vers src/
 import store from './store'
 import router from './router'
-import { apply } from 'core-js/library/fn/reflect';
+import { apply } from 'core-js/actual/reflect';
 
 const app = createApp(App);
 app.use(store);
