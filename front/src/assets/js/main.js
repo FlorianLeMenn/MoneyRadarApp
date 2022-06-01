@@ -6,22 +6,22 @@ const main = {
         const checkRecurrent  = document.getElementById('checkRecurrent');
         const fieldsContainer = document.getElementById('recurrentFieldsContainer');
 
-        checkRecurrent.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                fieldsContainer.classList.toggle('hidden');
-            }
-            else {
-                fieldsContainer.classList.toggle('hidden');
-            }
-        });
+        if(checkRecurrent) {
+            checkRecurrent.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    fieldsContainer.classList.toggle('hidden');
+                }
+                else {
+                    fieldsContainer.classList.toggle('hidden');
+                }
+            });
+        }
         
-        btnAdd.addEventListener('click', (event) => {
-            displayForm.classList.toggle('hidden');
-        });
-        
-        btnCancel.addEventListener('click', (e) => {
-            displayForm.classList.toggle('hidden');
-        });
+        if(btnCancel){
+            btnCancel.addEventListener('click', (e) => {
+                displayForm.classList.toggle('hidden');
+            });
+        }
     }
 }
 

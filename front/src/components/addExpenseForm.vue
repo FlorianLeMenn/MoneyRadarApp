@@ -4,7 +4,7 @@
         method="POST"
         action="http://localhost:3000/finance"
     >
-        <div class="addNewForm flex flex-col max-w-sm mx-auto rounded-lg border border-gray-dark bg-gray antialiased shadow-lg hidden mb-2">
+        <div class="flex flex-col max-w-sm mx-auto rounded-lg border border-gray-dark bg-gray antialiased shadow-lg mb-2">
             <div class="flex flex-row justify-between p-6 bg-gray-dark border-b border-gray-dark rounded-tl-lg rounded-tr-lg">
                 <p class="font-semibold text-white">Nouvelle dépense</p>
             </div>
@@ -236,7 +236,7 @@
                 </div>
                 <!-- END date picker -->
                 <div class="flex flex-row items-center justify-between py-2">
-                    <button type="button" class="cancelBtn px-4 py-2 text-white font-semibold bg-red text-white text-sm uppercase rounded">
+                    <button @click="cancelForm" type="button" class="cancelBtn px-4 py-2 text-white font-semibold bg-red text-white text-sm uppercase rounded">
                         Annuler
                     </button>
                     <button type="submit" class="px-4 py-2 text-white font-semibold bg-blue text-white text-sm uppercase rounded">
@@ -272,6 +272,7 @@ axios.defaults.baseURL = 'http://localhost:3000';
 
 export default {
   name: 'addExpenseForm',
+  props: ['showForm'],
       data() {
         return {
             showDatepicker: false,
@@ -296,9 +297,7 @@ export default {
             }
         };
     },
-    created() {
-
-        
+    created() {    
     },
     mounted() {
         this.initDate();
@@ -306,6 +305,9 @@ export default {
         this.initCategories();
     },
     methods: {
+        cancelForm() {
+             this.$emit('cancelForm');
+        },
         onSubmit(e) {
             e.preventDefault() // don't perform submit action (i.e., `<form>.action`)
             if(this.newExpense.title === undefined) {
@@ -344,24 +346,26 @@ export default {
                             //jour glissant
                             break;
                         case 1:
-                                //semaine glissante pendant 1 an
-                                duration = differenceInWeeks(lastDay, parseISO(selectedDate));
-                                total    = Math.round(duration/interval); 
-                                let nextweek = addWeeks(parseISO(selectedDate), interval);
-                                for (let i = 0; i < total; i++) {
-                                    nextweek = addWeeks(nextweek, interval);
-                                    this.newExpense.date = nextweek.toISOString();
-                                    const message = await axios.post(`/finance`, this.newExpense);
-                                    if (!message) {
-                                        this.$store.dispatch('setError', 'Impossible de créer la dépense');
-                                    }
-                                }  
+                            //semaine glissante pendant 1 an
+                            duration     = differenceInWeeks(lastDay, parseISO(selectedDate));
+                            total        = Math.round(duration/interval); 
+                            let nextweek = addWeeks(parseISO(selectedDate), interval);
+
+                            for (let i = 0; i < total; i++) {
+                                nextweek = addWeeks(nextweek, interval);
+                                this.newExpense.date = nextweek.toISOString();
+                                const message = await axios.post(`/finance`, this.newExpense);
+                                if (!message) {
+                                    this.$store.dispatch('setError', 'Impossible de créer la dépense');
+                                }
+                            }  
                             break;
                         case 2:
                             //mois glissant
-                            duration = differenceInMonths(lastDay, parseISO(selectedDate));
-                            total    = Math.round(duration/interval)
+                            duration      = differenceInMonths(lastDay, parseISO(selectedDate));
+                            total         = Math.round(duration/interval)
                             let nextmonth = addMonths(parseISO(selectedDate), interval);
+                            
                             for (let i = 0; i < total; i++) {
                                 nextmonth = addMonths(nextmonth, interval);
                                 this.newExpense.date = nextmonth.toISOString();
@@ -391,13 +395,11 @@ export default {
                 if (!message) {
                     this.$store.dispatch('setError', 'Impossible de créer la dépense');
                 }
-
                 this.message = 'Dépense crée';
                 this.$store.dispatch('loadExpenses');
                 this.$store.dispatch('loadAllExpenses');
                 this.$store.dispatch('loadExpensesTotal');
                 
-
             } catch (error) {
                 this.$store.dispatch('setError', error);
             }

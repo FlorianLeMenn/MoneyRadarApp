@@ -13,7 +13,7 @@
     components: {
         menuTapBar,
         expensesChart,
-        addExpenseForm,
+        //addExpenseForm,
         expenseList,
     },
     watch: {},

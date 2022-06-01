@@ -12,11 +12,17 @@
         </div>
     </div>
     <div class="m-2 max-w-sm mx-auto flex text-center">
-        <a href="#" class="addNewBtn p-4 grow max-w rounded-xl bg-blue text-white text-sm uppercase">Ajouter une
-            dépense</a>
-    </div>
 
-    <add-expense-form></add-expense-form> 
+        <button 
+            @click="displayForm"
+            class="addNewBtn p-4 grow max-w rounded-xl bg-blue text-white text-sm uppercase"
+            href="#">
+            Ajouter une dépense
+        </button>
+    </div>
+    <div :class="[ showForm == true ? '' : 'hidden' ] + ' addNewForm'"> 
+        <add-expense-form :showForm="showForm" @cancelForm="cancelForm" ></add-expense-form> 
+    </div>
 
     <expense-list :expensesList="expensesList" ></expense-list>
 </template>
@@ -29,6 +35,11 @@ import main from '../assets/js/main.js';
 
 export default {
     name: 'Finance',
+    data() {
+        return {
+            visibleForm: false,
+        }
+    },
     components: {
         expensesChart,
         addExpenseForm,
@@ -43,7 +54,18 @@ export default {
     },
     
     //prorietes calculées
+    methods: {
+        displayForm() {
+            this.visibleForm = !this.visibleForm;
+        },
+        cancelForm() {
+            this.visibleForm = false;
+        }
+    },
     computed: {
+        showForm() {
+            return this.visibleForm;
+        },
         groupedExpenses() {
             return this.$store.state.groupedExpenses; 
         },
