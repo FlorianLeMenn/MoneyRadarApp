@@ -73,7 +73,7 @@ axios.defaults.baseURL = 'http://localhost:3000';
 
 export default {
     name: 'addTaskForm',
-    props: ['allTaskList', 'listId'],
+    props: ['listId'],
     data() {
         return {
             message: '',

@@ -3,7 +3,6 @@
         Todo Board
     </h1>
     <div class="todolist p-6 max-w-sm mx-auto bg-gray rounded-xl shadow-lg flex flex-col ">
-        <h2  class="mb-6 text-l max-w-sm mx-auto font-bold text-white text-left" >{{title}}</h2>
         <div class="period-nav m-4 flex justify-around items-center text-center text-gray1">
             <div class="day selected py-1 px-2 text-white rounded-full bg-gray-light" data-item="day">Jour</div>
             <div class="week" data-item="week">Semaine</div>

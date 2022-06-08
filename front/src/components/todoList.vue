@@ -1,24 +1,25 @@
 
 <template >
-    <div class="todo-list-container">
+    <div class="container">
         <div class="list flex flex-col  max-w-sm mx-auto">
             <hr class="text-gray1 mb-4">
             <div v-for="list in allTodoList" :value="list.id" :key="list.id" class="mb-4 px-4 py-2 bg-gray-dark rounded-xl  ">
-                <div class="flex items-center gap-4 mb-4">
+                <div :class='"list-container list-" + list.id +" items-center gap-4 mb-4"'>
                     <div class="date text-sm text text-left text-gray1">{{ list.order }}</div>
                     <div class="title font-bold">{{ list.title }}</div>
                     <div class="ml-auto font-bold text-right">
-                        <button v-if="list.id" @click="this.$store.dispatch('removeTodoList', list.id)">Supprimer</button>
+                        <!-- <button v-if="list.id" @click="this.$store.dispatch('removeTodoList', list.id)">Supprimer</button> -->
+                        <button v-if="list.id" @click="loadTasks(list.id)">open</button>
                     </div>
-                </div>
-                <div class="task-container">
-                    liste
-                    <task-list :listId="list.id" :allTaskList="this.$store.dispatch('loadAllTasks',list.id)" @displayForm="displayForm" ></task-list>
+                    <div class="task-container">
+                        <div v-if="loading">loading...</div>
+                        <!-- <task-list :taskList="taskList" :listId="list.id" @displayForm="displayForm" ></task-list> -->
+                    </div>
                 </div>
             </div>
             {{this.$store.state.error}}
             <div :class="[ showForm === true ? '' : 'hidden' ] + ' addNewForm'"> 
-                <add-task-form :listId="listId" :showForm="showForm" ></add-task-form>
+                <add-task-form :listId="getListId" :showForm="showForm" ></add-task-form>
             </div>
         </div>
     </div>
@@ -26,11 +27,12 @@
     <button @click="addTodoList()" href="#" class="p-4 mb-2 grow max-w rounded-xl bg-blue text-white text-sm uppercase">
         + Nouvelle liste de tâches
     </button>
+    <task-list  :tasksList="tasksList" :listId="listId" @displayForm="displayForm" ></task-list>
 </template>
 
 <script>
-import taskList from './taskList.vue';
 import addTaskForm from './addTaskForm.vue';
+import taskList from './taskList.vue';
 import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
@@ -43,43 +45,41 @@ export default {
     },
     data() {
         return {
-            message: '',
-            error: '',
-            counter: 0,
+            loading: false,
             visibleForm: false,
-            listId: 10,
+            listId: 0,
+            tasks: [],
             newList: {
                 title: undefined,
                 order: 0,
             }
         };
     },
-    mounted() {
-        this.$store.dispatch('loadAllTasks');
-    },
     methods: {
         displayForm(listId) {
-            console.log('displayForm = ' + listId);
             this.listId = listId;
             this.visibleForm = !this.visibleForm;
         },
-        selectedList(newListId) {
-            this.listId = newListId
+        async loadTasks(listId) {
+            this.listId = listId;
+            const listContainer  = document.querySelector(`.list-container.list-${listId}`);
+            const taskListContainer = document.querySelector('.task-list');
+            //API call
+            this.$store.dispatch('loadTasks', listId);
+            //display tasks list
+            listContainer.appendChild(taskListContainer);
         },
         cancelForm() {
             this.visibleForm = false;
         },
         async addTodoList() {
             try {
-                this.newList.title = `Liste ${this.counter++}`;
-                this.newList.order = this.counter;
-                console.log(this.newList);
+                this.newList.title = `Liste test`;
                 const message = await axios.post(`/list`, this.newList);
 
                 if (!message) {
                     this.$store.dispatch('setError', 'Impossible de créer la liste');
                 }
-
                 this.message = 'Liste de tâche crée';
                 this.$store.dispatch('loadAllTodos');
 
@@ -87,21 +87,15 @@ export default {
                 this.$store.dispatch('setError', error);
             }
         },
-        async getTotalTask() {
-
-        }
     },
     computed: {
-        selectedList() {
-            return this.listId;
-        },
         showForm() {
             return this.visibleForm;
         },
-        listId() {
+        getListId() {
             return this.listId;
         },
-        allTaskList() {
+        tasksList() {
             return this.$store.state.tasksList; 
         },
     },
