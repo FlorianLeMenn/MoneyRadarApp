@@ -7,6 +7,7 @@ export default createStore( {
     state: {
         expensesList: [],
         todoList: [],
+        allTasksList: [],
         tasksList: [],
         moodList: [],
         groupedExpenses: [],
@@ -56,11 +57,10 @@ export default createStore( {
             state.moodList = days;
         },
         // TODOLIST BOARD
-        loadAllTasks(state, tasksList, listId = null) {
-            console.log('list loadAllTasks = ' + listId)
-            if (listId)
-                state.tasksList = tasksList.filter(el => listId == el.list_id);
-
+        loadAllTasks(state, allTasksList) {
+            state.allTasksList = allTasksList;
+        },
+        loadTasks(state, tasksList) {
             state.tasksList = tasksList;
         },
         loadAllTodos(state, todoList) {
@@ -180,6 +180,23 @@ export default createStore( {
                 }
                 else {
                     commit('loadAllTasks', tasksList.data);
+                }
+            } catch (error) {
+                commit('updateError', error);
+            }
+        },
+        async loadTasks({ commit }, listId) {
+            try {
+                if(!listId) commit('updateError', 'listId vide');
+                const tasksList = await axios.get(`/list/${listId}/tasks`);
+                if (!tasksList.data.tasks) {
+                    commit('updateError','Impossible de récupérer les taches');
+                }
+                if (!tasksList.data.tasks.length) {
+                    commit('updateError','Aucune tache');
+                }
+                else {
+                    commit('loadTasks', tasksList.data.tasks);
                 }
             } catch (error) {
                 commit('updateError', error);
