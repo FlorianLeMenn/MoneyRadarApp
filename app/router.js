@@ -25,4 +25,9 @@ router.route('/:modelName/:period(\\w+)')
   .all(utilsMiddleware.addModelInRequest)
   .get(mainController.getAll);
 
+//connected entities
+router.route('/:modelName/:id(\\d+)/:modelNameAssoc')
+  .all(utilsMiddleware.addModelInRequest)
+  .get(mainController.getAllWithAssociations);
+
 module.exports = router;

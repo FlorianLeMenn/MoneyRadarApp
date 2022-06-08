@@ -2,6 +2,24 @@ const { Op, Sequelize } = require('sequelize')
 const {startOfWeek, lastDayOfWeek, startOfMonth, lastDayOfMonth, lastDayOfYear, startOfYear } = require('date-fns');
 
 module.exports = {
+    async getAllWithAssociations(req, res, next) {
+      try {
+        let data = await req.Model.findByPk(req.params.id, {
+          include: [req.params.modelNameAssoc]
+        });
+
+        if(!data) {
+          // next permet de donnée la main au prochain middleware
+          next();
+          // Return permet d'empêcher au reste de la fonction de s'exécuter
+          return;
+        }
+        res.json(data);
+
+      } catch (err) {
+        res.status(500).send(err);
+      }
+    },
     async getAll(req, res) {
       try {
         
@@ -20,7 +38,6 @@ module.exports = {
           endDate     = lastDayOfYear(new Date());
           periodParam = 'year';
         }
-        console.log(req.params)
 
         // Grâce au middleware utiliser juste avant mon controller, le model de ma route est stocké dans la propriété Model de mon objet req.
         let options = {
@@ -74,6 +91,7 @@ module.exports = {
               }
           };
         }
+        console.log(req.params)
         const data = await req.Model.findByPk(req.params.id, options);
   
         // Si la donnée n'existe pas, on va appeler le middleware suivant, dans notre cas il n'y en a pas. Cela va retourner une 404
