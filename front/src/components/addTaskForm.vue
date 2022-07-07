@@ -150,8 +150,9 @@ export default {
                 if (!message) {
                     this.$store.dispatch('setError', 'Impossible de créer la tache');
                 }
-
                 this.message = 'Tache crée';
+                // Refresh list
+                this.$store.dispatch('loadTasks', this.listId);
 
             } catch (error) {
                 this.$store.dispatch('setError', error);

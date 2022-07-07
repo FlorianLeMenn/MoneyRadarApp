@@ -189,11 +189,10 @@ export default createStore( {
             try {
                 if(!listId) commit('updateError', 'listId vide');
                 const tasksList = await axios.get(`/list/${listId}/tasks`);
-                if (!tasksList.data.tasks) {
-                    commit('updateError','Impossible de récupérer les taches');
-                }
-                if (!tasksList.data.tasks.length) {
+                if (!tasksList.data.tasks || !tasksList.data.tasks.length) {
                     commit('updateError','Aucune tache');
+                    //set an empty task list
+                    commit('loadTasks', []);
                 }
                 else {
                     commit('loadTasks', tasksList.data.tasks);
