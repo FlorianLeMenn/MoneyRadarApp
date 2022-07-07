@@ -5,7 +5,10 @@ module.exports = {
     async getAllWithAssociations(req, res, next) {
       try {
         let data = await req.Model.findByPk(req.params.id, {
-          include: [req.params.modelNameAssoc]
+          include: [req.params.modelNameAssoc],
+          order: [
+            [req.params.modelNameAssoc, 'position', 'ASC'],
+          ],
         });
 
         if(!data) {
@@ -126,10 +129,11 @@ module.exports = {
       }
     },
     async update(req, res, next) {
+      console.log('UPDATE');
       try {
-        // console.log('UPDATE');
-        // console.log('ID = ' + req.params.id);
-        // console.log('BODY = ' + req.body);
+        console.log('UPDATE');
+        console.log('ID = ' + req.params.id);
+        console.log('BODY = ' + req.body);
         // On modifie notre donnée grâce au where. Les données qui seront modifiées seront celle du req.body
         const [nbUpdated, data] = await req.Model.update(req.body, {
           where: {
