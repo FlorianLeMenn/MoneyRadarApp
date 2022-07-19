@@ -3,15 +3,20 @@
         MoodBoard
     </h1>
     <div class="moodboard p-6 max-w-sm mx-auto bg-gray rounded-xl shadow-lg flex flex-col ">
-        <h2  class="mb-6 text-l max-w-sm mx-auto font-bold text-white text-left" >{{title}}</h2>
+        <h2  class="mb-6 text-l max-w-sm mx-auto font-bold text-white text-left" >
+            <span @click="sub(current_date)"> &lt;</span>
+            {{current_date_format}}
+            <span @click="add(current_date)"> > </span>
+        </h2>
+        
         <div class="container">
             <div 
-            @click="setMood((index + 1), $event)" 
-            v-for="moodDay in moodList" :value="moodDay.id" :key="moodDay.id" 
-            :class="[ moodDay.date == currentday ? 'today' : '' ] + ' day day-' + moodDay.date"
-            :style="'background: '+ [ moodDay.mood ? moodDay.mood : '' ] "
+                @click="setMood((moodDay.day - 1), $event)" 
+                v-for="moodDay in moodList" :value="moodDay.id" :key="moodDay.id" 
+                :class="[ moodDay.day == currentday ? 'today' : '' ] + ' day day-' + moodDay.day"
+                :style="'background: '+ [ moodDay.mood ? moodDay.mood : '' ] "
             >
-                {{ moodDay.date }} <span>{{ moodDay.description }}</span>
+                {{ moodDay.day }} <span>{{ moodDay.description }}</span>
             </div>
         </div>
 
@@ -34,11 +39,12 @@
 
         <div>
             {{ this.$store.state.error }}
+            {{ this.message }}
         </div>
 
         <form 
             @submit="onSubmit"
-            method="POST"
+            :method=this.methode
             action="http://localhost:3000/mood"
         >
             <input 
@@ -50,20 +56,26 @@
             />
             <input 
                 v-model="newMood.mood" 
-                type="hidden" 
+                type="text" 
                 name="mood" 
                 class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
             />
             <input 
                 v-model="newMood.date" 
-                type="hidden" 
+                type="text" 
                 name="date" 
+                class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
+            />
+            <input 
+                v-model="newMood.day" 
+                type="text" 
+                name="day" 
                 class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
             />
             
             <div class="flex flex-row items-center justify-between py-2">
                 <button type="submit" class="w-full px-4 py-2 text-white font-semibold bg-blue text-white text-sm uppercase rounded">
-                    Enregistrer
+                    {{ this.btnText }}
                 </button>
             </div>
 
@@ -74,6 +86,9 @@
 <script>
 import {format, getDate , getDaysInMonth, parseISO} from 'date-fns';
 import { enUS, fr } from 'date-fns/esm/locale'
+import sub from 'date-fns/sub'
+import add from 'date-fns/add'
+
 import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
@@ -81,23 +96,27 @@ export default {
     name: 'MoodBoard',
     data() {
         return {
-            title: format(new Date(), 'MMMM', {locale: fr}),
+            message: '',
+            current_date_format: format(new Date(), 'MMMM', {locale: fr}),
+            current_date: null,
+            selected_day: null,
+            methode: 'POST',
+            mode: 'create',
+            btnText: 'Enregistrer',
             totalDays: getDaysInMonth(new Date()),
             days: [],
             currentday: getDate(new Date()),
-            newMood: {
-                mood: '#d5e1e8',
-                description: '',
-                date: new Date().toISOString(),
-            }
+            newMood: {},
         };
     },
     created() {
     },
     mounted() {
-        this.$store.dispatch('loadAllMoods');
+        this.$store.dispatch('loadMoods', 'month');
     },
     methods: {
+        add() {},
+        sub() {},
         onSubmit(e) {
             e.preventDefault() // don't perform submit action (i.e., `<form>.action`)
             if(this.newMood.description === '') {
@@ -113,13 +132,52 @@ export default {
                 return;
             }
             else {
-                this.addMood();
+                if (this.mode === 'create')
+                    this.addMood();
+                if (this.mode === 'update')
+                    this.updateMood(this.newMood);
             }
         },
         setMood(index, e) {
+            // Add selected class
+            const listItems = document.querySelectorAll('.container .day');
+            for(var i = 0; i < listItems.length; i++){
+                // clean
+                
+                // add class selected
+                 if (listItems[i].classList.contains('selected')) {
+                        listItems[i].classList.toggle('selected');
+                    } 
+                else {
+                    listItems[i].addEventListener('click', function(event) {
+                        this.classList.toggle('selected');
+                    });
+                }
+            }
+
             if (index == this.currentday) { 
                 e.target.style.background = '#6bc279'; 
-            };
+            }
+            // Map date with moodarrayIs exist -> update
+            if (this.moodList[index].id) {
+                this.mode = 'update';
+                this.message = 'Mise à jour du mood du : ' + this.moodList[index].day + ' ' + this.current_date_format;
+                this.newMood = this.moodList[index]
+                this.methode = "PATCH"
+                this.btnText = "Enregistrer"
+            }
+            else {
+                //set empty mood
+                this.newMood = {
+                    mood: '#d5e1e8',
+                    date: new Date().toISOString(),
+                };
+                this.mode = 'create';
+                this.methode = "POST"
+                this.btnText = "Sauvegarder"
+                this.message = '';
+            }
+
         },
         getSliderVal(e) {
             const colorMap = {
@@ -135,10 +193,25 @@ export default {
                 '90': '#fb6f62',
                 '100': '#df4644',
             }
-
+            //test if is currently selected    
             const currentDay = document.querySelector(`.day-${this.currentday}`);
             currentDay.style.background = colorMap[e.target.value];
             this.newMood.mood = colorMap[e.target.value];
+        },
+        async updateMood(payload) {
+            try {
+                const message = await axios.patch(`/mood/${payload.id}`, payload);
+
+                if (!message) {
+                    this.$store.dispatch('setError', 'Impossible de mettre à jour le mood');
+                }
+
+                this.message = 'Mood mise à jour';
+                this.$store.dispatch('loadMoods');
+
+            } catch (error) {
+                this.$store.dispatch('setError', error);
+            }
         },
         async addMood() {
             try {
@@ -149,6 +222,7 @@ export default {
                 }
 
                 this.message = 'Mood crée';
+                this.$store.dispatch('loadMoods');
 
             } catch (error) {
                 this.$store.dispatch('setError', error);
@@ -220,6 +294,10 @@ input[type=range]::-webkit-slider-runnable-track {
 }
 .moodboard .today {
     background: #414376;
+}
+
+.moodboard .day.selected {
+    border: 2px solid salmon;
 }
 
 </style>

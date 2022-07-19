@@ -42,6 +42,17 @@ module.exports = {
           periodParam = 'year';
         }
 
+        let options_periode = {
+          where: {
+            date: {
+              [Op.between] : [startedDate, endDate],
+            }
+          },
+          ...(!req.params.period && {order: [
+            ['date', 'ASC']
+          ]}),
+        }
+        
         // Grâce au middleware utiliser juste avant mon controller, le model de ma route est stocké dans la propriété Model de mon objet req.
         let options = {
           ...(req.params.period && { attributes: [
@@ -69,7 +80,12 @@ module.exports = {
           }),
         };
 
-        if(req.Model.name != 'Finance') {
+        if(req.Model.name == 'Mood') {
+          const data = await req.Model.findAll(options_periode);
+          console.log(data);
+          res.json(data);
+        }
+        else if(req.Model.name != 'Finance') {
           const data = await req.Model.findAll();
           res.json(data);
         }

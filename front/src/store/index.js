@@ -41,19 +41,22 @@ export default createStore( {
         loadAllMoods(state, moodList) {
             //https://stackoverflow.com/questions/49627157/update-the-attribute-value-of-an-object-using-the-map-function-in-es6
             const mood = moodList.map( ({ date, ...list }) => {
-                return {...list, date: format(parseISO(date), 'd')};
+                return {...list, day: format(parseISO(date), 'd'), date: date};
             });
             const date = new Date();
-            
             let days = []
+
+            //create all days in month
             for (let index = 1; index <= getDaysInMonth(date); index++) {
-                const data = mood.find( el => +el.date == index)
-                
+                //search day in the month with existing valuein mood array
+                const data = mood.find( el => +el.day == index)
                 if(data)
                     days.push(data);
                 else
-                    days.push({'id': '', 'mood':'', 'description': '', 'date': index});
+                    days.push({'id': '', 'mood':'', 'description': '', 'day':index, 'date': index});
             }
+            console.log('DAYS');
+            console.log(days);
             state.moodList = days;
         },
         // TODOLIST BOARD
@@ -101,6 +104,26 @@ export default createStore( {
                 else {
                     commit('loadAllMoods', moodList.data);
                 }
+            } catch (error) {
+                commit('updateError', error);
+            }
+        },
+        async loadMoods({ commit }, period = 'month') {
+            try {
+
+                const moodList = await axios.get(`/mood/${period}`);
+                console.log(period);
+                console.log(moodList.data);
+                commit('loadAllMoods', moodList.data);
+                // if (!moodList.data) {
+                //     commit('updateError','Impossible de récupérer les moods');
+                // }
+                // if (!moodList.data.length) {
+                //     commit('updateError','Aucun mood');
+                // }
+                // else {
+                    
+                // }
             } catch (error) {
                 commit('updateError', error);
             }
