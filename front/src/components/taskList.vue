@@ -31,7 +31,12 @@
                     </div>
             </div>
             <div class="ml-auto font-bold text-right">
-                <button v-if="element.id" @click="this.$store.dispatch('removeTask', element.id)">Supprimer</button>
+                <button 
+                    v-if="element.id" 
+                    @click="this.$store.dispatch('removeTask', element.id)"
+                >
+                Supprimer
+                </button>
             </div>
         </div>
 
@@ -84,10 +89,7 @@ export default {
 
         },
         async updateTask(task) {
-
             try {
-                console.log("updateTask");
-               
                 const message = await axios.patch(`/task/${task.id}`,
                     {
                         title: 'test',
@@ -96,7 +98,6 @@ export default {
                     }
                 );
 
-                console.log(message.data);
                 if (!message) {
                     this.$store.dispatch('setError', 'Impossible de créer la tache');
                 }
