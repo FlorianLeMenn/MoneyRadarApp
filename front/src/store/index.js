@@ -128,6 +128,21 @@ export default createStore( {
                 commit('updateError', error);
             }
         },
+        async removeMood({ commit }, moodId) {
+            try {
+                if(!moodId) commit('updateError', 'expenseId vide');
+                const removedItem = await axios.delete(`/mood/${moodId}`);
+                if (!removedItem) {
+                    commit('updateError', 'Impossible de supprimer le mood: ' + moodId);
+                }
+                commit('removeExpense', moodId);
+                this.dispatch('loadMoods');
+                this.dispatch('loadAllMoods');
+
+            } catch (error) {
+                commit('updateError', error);
+            }
+        },
         async loadAllExpenses({ commit }) {
             try {
                 const financeList = await axios.get(`/finance`);

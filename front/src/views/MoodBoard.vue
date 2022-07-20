@@ -72,9 +72,24 @@
                 name="day" 
                 class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
             />
+            <input 
+                v-if="newMood.id" 
+                v-model="newMood.id" 
+                type="text" 
+                name="day" 
+                class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
+            />
             
             <div class="flex flex-row items-center justify-between py-2">
-                <button type="submit" class="w-full px-4 py-2 text-white font-semibold bg-blue text-white text-sm uppercase rounded">
+                <button 
+                    v-if="newMood.id" 
+                    @click="this.$store.dispatch('removeMood', newMood.id)"
+                    type="button" 
+                    class="cancelBtn px-4 py-2 text-white font-semibold bg-red text-white text-sm uppercase rounded"
+                >
+                    Supprimer
+                </button>
+                <button type="submit" class="px-4 py-2 text-white font-semibold bg-blue text-white text-sm uppercase rounded">
                     {{ this.btnText }}
                 </button>
             </div>
@@ -106,7 +121,9 @@ export default {
             totalDays: getDaysInMonth(new Date()),
             days: [],
             currentday: getDate(new Date()),
-            newMood: {},
+            newMood: {
+                date: new Date().toISOString(),
+            },
         };
     },
     created() {
@@ -142,22 +159,18 @@ export default {
             // Add selected class
             const listItems = document.querySelectorAll('.container .day');
             for(var i = 0; i < listItems.length; i++){
-                // clean
-                
-                // add class selected
+                // Remove selected class
                  if (listItems[i].classList.contains('selected')) {
-                        listItems[i].classList.toggle('selected');
+                        listItems[i].classList.remove('selected');
                     } 
                 else {
+                    // Add class selected
                     listItems[i].addEventListener('click', function(event) {
-                        this.classList.toggle('selected');
+                        this.classList.add('selected');
                     });
                 }
             }
 
-            if (index == this.currentday) { 
-                e.target.style.background = '#6bc279'; 
-            }
             // Map date with moodarrayIs exist -> update
             if (this.moodList[index].id) {
                 this.mode = 'update';
@@ -166,12 +179,8 @@ export default {
                 this.methode = "PATCH"
                 this.btnText = "Enregistrer"
             }
-            else {
-                //set empty mood
-                this.newMood = {
-                    mood: '#d5e1e8',
-                    date: new Date().toISOString(),
-                };
+            // Set empty mood, current day
+            if (index == this.currentday) { 
                 this.mode = 'create';
                 this.methode = "POST"
                 this.btnText = "Sauvegarder"
@@ -227,7 +236,7 @@ export default {
             } catch (error) {
                 this.$store.dispatch('setError', error);
             }
-        }
+        },
     },
     computed: {
         moodList() {
