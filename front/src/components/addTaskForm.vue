@@ -144,7 +144,6 @@ export default {
 
         async addTask() {
             try {
-                console.log(this.newTask)
                 const message = await axios.post(`/task`, this.newTask);
 
                 if (!message) {

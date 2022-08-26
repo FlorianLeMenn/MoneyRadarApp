@@ -3,25 +3,55 @@
     <div class="container">
         <div class="list flex flex-col  max-w-sm mx-auto">
             <hr class="text-gray1 mb-4">
-            <div v-for="list in allTodoList" :value="list.id" :key="list.id" class="mb-4 px-4 py-2 bg-gray-dark rounded-xl  ">
-            <div class="flex list-info">
+            <div 
+                v-for="list in allTodoList" :value="list.id" :key="list.id" 
+            class="mb-4 px-4 py-2 bg-gray-dark rounded-xl  ">
+            <div class="flex list-info items-center">
+                {{list.id}}
                 <div class="flex date text-sm text text-left text-gray1">
-                    <div class="picto">
-                        <svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="12.000000pt" height="12.000000pt" viewBox="0 0 128.000000 128.000000" preserveAspectRatio="xMidYMid meet">
-                        <g transform="translate(0.000000,128.000000) scale(0.100000,-0.100000)" fill="#ffffff" stroke="none">
-                        <path d="M207 1162 c-64 -64 -117 -124 -117 -133 0 -19 20 -39 40 -39 8 0 49 34 90 75 l75 76 5 -562 c5 -521 6 -563 23 -573 12 -8 22 -8 35 0 16 10 17 52 22 573 l5 562 75 -76 c41 -41 82 -75 90 -75 20 0 40 20 40 40 0 20 -230 250 -250 250 -9 0 -68 -53 -133 -118z"/>
-                        <path d="M912 1268 c-9 -9 -12 -150 -12 -572 l0 -561 -78 78 c-42 42 -84 77 -93 77 -19 0 -39 -20 -39 -40 0 -19 230 -250 250 -250 20 0 250 231 250 250 0 20 -20 40 -39 40 -9 0 -51 -35 -93 -77 l-78 -78 0 561 c0 579 0 584 -40 584 -9 0 -21 -5 -28 -12z"/>
+                    <div class="picto mr-2 w-8">
+                        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                            viewBox="0 0 512.004 512.004" style="enable-background:new 0 0 512.004 512.004;" xml:space="preserve">
+                        <g>
+                            <rect x="238.984" y="118.986" style="fill:#BCBCBC;" width="199.188" height="16"/>
+                            <rect x="238.984" y="177.217" style="fill:#BCBCBC;" width="273.02" height="16"/>
+                            <rect x="238.984" y="329.623" style="fill:#BCBCBC;" width="189.006" height="16"/>
+                            <rect x="238.984" y="389.702" style="fill:#BCBCBC;" width="273.02" height="16"/>
+                        </g>
+                        <rect x="8" y="90.753" style="fill:#FFFFFF;" width="143.438" height="143.438"/>
+                        <path style="fill:#BCBCBC;" d="M143.44,98.755v127.44H16V98.755H143.44 M159.44,82.754H0v159.44h159.44V82.754z"/>
+                        <rect x="8" y="303.217" style="fill:#FFFFFF;" width="143.438" height="143.449"/>
+                        <path style="fill:#BCBCBC;" d="M143.44,311.211v127.44H16v-127.44H143.44 M159.44,295.21H0v159.44h159.44V295.21z"/>
+                        <g>
+                            <polygon style="fill:#E21B1B;" points="96.016,416.707 35.36,362.835 56.504,339.026 91.792,370.37 170.296,269.826 195.4,289.427 
+                                    "/>
+                            <polygon style="fill:#E21B1B;" points="96.016,204.234 35.36,150.362 56.504,126.554 91.792,157.899 170.296,57.354 195.4,76.954 	
+                                "/>
                         </g>
                         </svg>
                     </div>
-                    <div class="order">
-                        {{ list.order }}
-                    </div>                 
+                    <div class="order"></div>                 
                 </div>
                 <div class="title font-bold">{{ list.title }}</div>
                 <div class="ml-auto font-bold text-right">
-                    <!-- <button v-if="list.id" @click="this.$store.dispatch('removeTodoList', list.id)">Supprimer</button> -->
-                    <button v-if="list.id" @click="loadTasks(list.id)">open</button>
+                    <button 
+                        v-if="list.id"
+                        @click="this.$store.dispatch('removeTodoList', list.id)"
+                    >
+                        <svg width="24px" height="24px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="removeIconTitle" stroke="#EF5350" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" color="#000000">
+                            <title id="removeIconTitle">Remove</title> 
+                            <path d="M17,12 L7,12"/>
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                    </button>
+                    <button 
+                        v-if="list.id"
+                        @click="loadTasks(list.id)"
+                    >
+                        <svg width="24px" height="24px" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M37 18L25 30L13 18" stroke="#919db5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
             <div :class='"list-container list-" + list.id +" items-center"'></div>
@@ -65,13 +95,11 @@ export default {
         };
     },
     methods: {
-        displayForm(listId) {
-            this.listId = listId;
+        displayForm() {
             this.visibleForm = !this.visibleForm;
         },
         async loadTasks(listId) {
             this.listId = listId;
-
             const listContainer  = document.querySelector(`.list-container.list-${listId}`);
             const taskListContainer = document.querySelector('.task-list');
             //API call

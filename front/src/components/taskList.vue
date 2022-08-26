@@ -1,47 +1,51 @@
 
 <template >
     <div 
-        :class="[ showTaskList === true ? '' : 'hidden' ] + ' mt-4 task-list list weekList flex flex-col p-6 max-w-sm mx-auto bg-gray rounded-xl shadow-lg'"
+        :class="[ showTaskList === true ? '' : 'hidden' ] + ' mt-4 task-list list weekList flex flex-col p-2 max-w-sm mx-auto bg-gray rounded-xl shadow-lg'"
     >
-        <div class="flex flex-row gap-4">
-            Liste des taches <button @click="displayForm(listId)" href="#" class="px-2 rounded bg-blue text-white text-sm uppercase right">+</button>
-            <hr class="text-gray1 mb-4">
-        </div>
         <draggable 
             v-model="tasksList" 
-            tag="div" 
+            tag="div"
             item-key="id"
-            :move="checkMove"
+            :sort="true"
             ghost-class="ghost"
             chosen-class="chosen"
-            @end="updateTasksList()" 
+            @end="updateItemOrder"
         >
         <template #item="{element, index}">
-        <div class="container flex flex-row">
-            <div class="text-sm text text-left text-gray1"  >{{index}} - {{ element.position }}</div>
-            <div class="">
-                <div class="title font-bold">{{ element.title }}</div>
-                <div class="date text-sm text text-left text-gray1">Terminé 
-                    <input 
-                        type="checkbox" 
-                        name="finish"
-                        :value="element.id"  
-                        v-model="finishedTask"  
-                        :checked="element.finish" >
-                    </div>
+        
+            <div class="container task border-b p-2 flex flex-row">
+                <div class="text-sm text mr-2">
+                    {{ element.position }}
+                        <input
+                            @change="updateTasksList(element, $event)"
+                            type="checkbox"
+                            :checked="element.finish"
+                            v-model="element.finish" 
+                            :value="element.id"
+                            @start="isDragging = true"
+                            @end="isDragging = false"
+                        >
+                </div>
+                <div  :class="[ element.finish === true ? 'finished' : '' ] + ' title'">{{ element.title }}</div>
+                <div class="font-bold">
+                    <button 
+                        v-if="element.id" 
+                        @click="this.$store.dispatch('removeTask', element.id)"
+                    >
+                        <svg width="24px" height="24px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="removeIconTitle" stroke="#EF5350" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" color="#000000">
+                            <title id="removeIconTitle">Remove</title> 
+                            <path d="M17,12 L7,12"/>
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <div class="ml-auto font-bold text-right">
-                <button 
-                    v-if="element.id" 
-                    @click="this.$store.dispatch('removeTask', element.id)"
-                >
-                Supprimer
-                </button>
-            </div>
-        </div>
-
         </template>
         </draggable>
+        <div class="flex flex-row gap-4 pt-4 pb-4 justify-center">
+            <button @click="displayForm(listId)" href="#" class="px-2 rounded bg-blue text-white text-sm uppercase right">+</button>
+        </div>
     </div>
 </template>
 
@@ -66,37 +70,27 @@ export default {
         displayForm(event) {
             this.$emit('displayForm', this.listId);
         },
-        checkMove(e) {
-            console.log("checkMove");
-            console.log(e.draggedContext.element.position);
-        },
-        updateTasksList() {
-            this.tasksList.map((task, index) => {
-                
-                const isFinished = this.finishedTask.find( el => el === task.id);
-                task.finish = false;
-                console.log("finished ? = " + isFinished);
-                if (isFinished) {
-                    task.finish = true;
-                    console.log("finish = " + task.finish);
-                }
-            
+        updateItemOrder(e) {
+            this.tasksList.map(function(task, index) {
                 task.position = index;
-                this.updateTask(task);
-                // clean finished Task 
-                this.finishedTask = [];
             });
-
+            this.tasksList.forEach(task => {
+                this.updateTask(task);
+            });
+        },
+        async updateTasksList(task, event) {
+            if (event.target.checked) {
+                task.finish = true;
+                this.updateTask(task);
+            }
+            else {
+                task.finish = false;
+                this.updateTask(task);      
+            }
         },
         async updateTask(task) {
             try {
-                const message = await axios.patch(`/task/${task.id}`,
-                    {
-                        title: 'test',
-                        position: task.position,
-                        finish: true,
-                    }
-                );
+                const message = await axios.patch(`/task/${task.id}`,task);
 
                 if (!message) {
                     this.$store.dispatch('setError', 'Impossible de créer la tache');
@@ -124,6 +118,17 @@ export default {
     background-color: red;
     }
 .chosen {
-    background-color: green;
+    background-color: #353766;
+    opacity: 0.7;
+}
+.task-list .border-b {
+    border-color: #292B4D;
+}
+.task {
+    justify-content: space-between;
+    align-items: center;
+}
+.finished {
+    text-decoration: line-through;
 }
 </style>
