@@ -1,5 +1,5 @@
 import { createStore } from 'vuex'
-import {startOfWeek, lastDayOfWeek, eachDayOfInterval, format, parseISO, getDaysInMonth, getDate} from 'date-fns';
+import {startOfWeek,startOfMonth, lastDayOfWeek,lastDayOfMonth, eachDayOfInterval, format, formatISO, parseISO, getDaysInMonth, getDate} from 'date-fns';
 import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000';
 
@@ -39,25 +39,34 @@ export default createStore( {
         },
         // MOODBOARD
         loadAllMoods(state, moodList) {
+            let monthCalendar = []
+             //default week star monday
+             const startedDate = startOfMonth(new Date(), { weekStartsOn: 1 });
+             const endDate     = lastDayOfMonth(new Date(), { weekStartsOn: 1 });
+             const lastDay     = format((endDate), 'd');
+             //month interval
+             const month = eachDayOfInterval({
+                 start: startedDate,
+                 end: endDate
+             })
+             //Format ISO day of month 
+             const allMonthDays = month.map(el => el = formatISO(el));
+
             //https://stackoverflow.com/questions/49627157/update-the-attribute-value-of-an-object-using-the-map-function-in-es6
             const mood = moodList.map( ({ date, ...list }) => {
                 return {...list, day: format(parseISO(date), 'd'), date: date};
             });
-            const date = new Date();
-            let days = []
-
             //create all days in month
-            for (let index = 1; index <= getDaysInMonth(date); index++) {
+            for (let index = 1; index <= lastDay; index++) {
                 //search day in the month with existing valuein mood array
-                const data = mood.find( el => +el.day == index)
-                if(data)
-                    days.push(data);
+                const dayData = mood.find( el => +el.day == index)
+                
+                if(dayData)
+                    monthCalendar.push(dayData);
                 else
-                    days.push({'id': '', 'mood':'', 'description': '', 'day':index, 'date': index});
+                    monthCalendar.push({'id': '', 'mood':'', 'description': '', 'day':index, 'date':  allMonthDays[index - 1]});
             }
-            console.log('DAYS');
-            console.log(days);
-            state.moodList = days;
+            state.moodList = monthCalendar;
         },
         // TODOLIST BOARD
         loadAllTasks(state, allTasksList) {
@@ -75,7 +84,7 @@ export default createStore( {
         },
         removeTodoList(state, todoId) {
             const updateTodoList = state.todoList.filter(el => todoId != el.id);
-            state,todoList = updateTodoList;
+            state.todoList = updateTodoList;
         },
         removeExpense(state, expenseId) {
             const updateExpensesList = state.expensesList.filter(el => expenseId != el.id);
@@ -99,7 +108,7 @@ export default createStore( {
                     commit('updateError','Impossible de récupérer les moods');
                 }
                 if (!moodList.data.length) {
-                    commit('updateError','Aucun mood');
+                    commit('updateError','Aucun mood.');
                 }
                 else {
                     commit('loadAllMoods', moodList.data);
@@ -112,8 +121,6 @@ export default createStore( {
             try {
 
                 const moodList = await axios.get(`/mood/${period}`);
-                console.log(period);
-                console.log(moodList.data);
                 commit('loadAllMoods', moodList.data);
                 // if (!moodList.data) {
                 //     commit('updateError','Impossible de récupérer les moods');
@@ -265,6 +272,7 @@ export default createStore( {
                 }
                 commit('removeTodoList', todoId);
                 this.dispatch('loadAllTodos');
+                
 
             } catch (error) {
                 commit('updateError', error);
