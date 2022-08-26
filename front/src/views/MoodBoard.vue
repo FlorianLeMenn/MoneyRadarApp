@@ -11,7 +11,7 @@
         
         <div class="container">
             <div 
-                @click="setMood((moodDay.day - 1), $event)" 
+                @click="setMood((moodDay.day), $event)" 
                 v-for="moodDay in moodList" :value="moodDay.id" :key="moodDay.id" 
                 :class="[ moodDay.day == currentday ? 'today' : '' ] + ' day day-' + moodDay.day"
                 :style="'background: '+ [ moodDay.mood ? moodDay.mood : '' ] "
@@ -22,7 +22,7 @@
 
         <output id="output"></output>
 
-        <input id="mood_slider" type="range" min="10" max="100" class="slider" step="10" list="tickmarks"  @change="getSliderVal">
+        <input id="mood_slider" type="range" min="10" max="100" class="slider" step="10" list="tickmarks"  @change="setSliderVal">
         <datalist id="tickmarks">
             <option value="0" label="0%"></option>
             <option value="10"></option>
@@ -43,6 +43,7 @@
         </div>
 
         <form 
+            v-if="displayForm" 
             @submit="onSubmit"
             :method=this.methode
             action="http://localhost:3000/mood"
@@ -56,26 +57,26 @@
             />
             <input 
                 v-model="newMood.mood" 
-                type="text" 
+                type="hidden" 
                 name="mood" 
                 class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
             />
             <input 
                 v-model="newMood.date" 
-                type="text" 
+                type="hidden" 
                 name="date" 
                 class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
             />
             <input 
                 v-model="newMood.day" 
-                type="text" 
+                type="hidden" 
                 name="day" 
                 class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
             />
             <input 
                 v-if="newMood.id" 
                 v-model="newMood.id" 
-                type="text" 
+                type="hidden" 
                 name="day" 
                 class="p-2 mb-5 bg-gray-dark rounded shadow-sm"
             />
@@ -83,7 +84,7 @@
             <div class="flex flex-row items-center justify-between py-2">
                 <button 
                     v-if="newMood.id" 
-                    @click="this.$store.dispatch('removeMood', newMood.id)"
+                    @click="deleteMood(newMood.id)"
                     type="button" 
                     class="cancelBtn px-4 py-2 text-white font-semibold bg-red text-white text-sm uppercase rounded"
                 >
@@ -99,7 +100,7 @@
 </template>
 
 <script>
-import {format, getDate , getDaysInMonth, parseISO} from 'date-fns';
+import {format, getDate , getDaysInMonth} from 'date-fns';
 import { enUS, fr } from 'date-fns/esm/locale'
 import sub from 'date-fns/sub'
 import add from 'date-fns/add'
@@ -116,25 +117,42 @@ export default {
             current_date: null,
             selected_day: null,
             methode: 'POST',
-            mode: 'create',
             btnText: 'Enregistrer',
             totalDays: getDaysInMonth(new Date()),
             days: [],
             currentday: getDate(new Date()),
             newMood: {
+                mood: '#fbe38b',
                 date: new Date().toISOString(),
             },
+            displayForm: true,
+            colorMap: {
+                '0': '#6bc279',
+                '10': '#6bc279',
+                '20': '#5db1a5',
+                '30': '#69ace2',
+                '40': '#d5e1e8',
+                '50': '#fbe38b',
+                '60': '#f7c257',
+                '70': '#fcab7d',
+                '80': '#f38757',
+                '90': '#fb6f62',
+                '100': '#df4644',
+            }
         };
     },
     created() {
     },
     mounted() {
+        this.$store.dispatch('setError','');
         this.$store.dispatch('loadMoods', 'month');
     },
     methods: {
         add() {},
         sub() {},
         onSubmit(e) {
+            this.$store.dispatch('setError','');
+            this.message = '';
             e.preventDefault() // don't perform submit action (i.e., `<form>.action`)
             if(this.newMood.description === '') {
                 this.$store.dispatch('setError', 'La description n\'est pas renseignée.');
@@ -149,20 +167,26 @@ export default {
                 return;
             }
             else {
-                if (this.mode === 'create')
+                if (this.methode === 'POST')
                     this.addMood();
-                if (this.mode === 'update')
+                if (this.methode === 'PATCH') {
                     this.updateMood(this.newMood);
+                }
+                
             }
         },
         setMood(index, e) {
+            this.message = '';
+            this.$store.dispatch('setError','');
+            this.displayForm = false;
+            // Cas non cliqué init au loading
             // Add selected class
             const listItems = document.querySelectorAll('.container .day');
             for(var i = 0; i < listItems.length; i++){
                 // Remove selected class
-                 if (listItems[i].classList.contains('selected')) {
-                        listItems[i].classList.remove('selected');
-                    } 
+                if (listItems[i].classList.contains('selected')) {
+                    listItems[i].classList.remove('selected');
+                } 
                 else {
                     // Add class selected
                     listItems[i].addEventListener('click', function(event) {
@@ -170,42 +194,34 @@ export default {
                     });
                 }
             }
-
-            // Map date with moodarrayIs exist -> update
-            if (this.moodList[index].id) {
-                this.mode = 'update';
-                this.message = 'Mise à jour du mood du : ' + this.moodList[index].day + ' ' + this.current_date_format;
-                this.newMood = this.moodList[index]
+            // Map date index with moodList array if id exist -> update
+            if (this.moodList[index - 1].id) {
+                this.displayForm = true;
+                this.message = 'Mise à jour du mood du : ' + this.moodList[index - 1].day + ' ' + this.current_date_format;
+                this.newMood = this.moodList[index - 1]
                 this.methode = "PATCH"
                 this.btnText = "Enregistrer"
             }
             // Set empty mood, current day
-            if (index == this.currentday) { 
-                this.mode = 'create';
+            else if (index == this.currentday && !this.moodList[index - 1].id) {
+                this.displayForm = true;
                 this.methode = "POST"
                 this.btnText = "Sauvegarder"
-                this.message = '';
+                this.newMood = {
+                        mood: this.getSliderVal(),
+                        date: new Date().toISOString(),
+                    }
             }
 
         },
-        getSliderVal(e) {
-            const colorMap = {
-                '0': '#6bc279',
-                '10': '#6bc279',
-                '20': '#5db1a5',
-                '30': '#69ace2',
-                '40': '#d5e1e8',
-                '50': '#fbe38b',
-                '60': '#f7c257',
-                '70': '#fcab7d',
-                '80': '#f38757',
-                '90': '#fb6f62',
-                '100': '#df4644',
-            }
-            //test if is currently selected    
-            const currentDay = document.querySelector(`.day-${this.currentday}`);
-            currentDay.style.background = colorMap[e.target.value];
-            this.newMood.mood = colorMap[e.target.value];
+        setSliderVal(e) {
+            const selected = document.querySelector(`.day.selected`) ? document.querySelector(`.day.selected`) : document.querySelector(`.today.day-${this.currentday}`);
+            selected.style.background = this.colorMap[e.target.value];
+            this.newMood.mood = this.colorMap[e.target.value];
+        },
+        getSliderVal() {
+            const value = document.querySelector('#mood_slider').value;
+            return value
         },
         async updateMood(payload) {
             try {
@@ -217,6 +233,8 @@ export default {
 
                 this.message = 'Mood mise à jour';
                 this.$store.dispatch('loadMoods');
+                //clean 
+                this.newMood = {};
 
             } catch (error) {
                 this.$store.dispatch('setError', error);
@@ -232,11 +250,21 @@ export default {
 
                 this.message = 'Mood crée';
                 this.$store.dispatch('loadMoods');
+                //clean 
+                this.newMood = {};
 
             } catch (error) {
                 this.$store.dispatch('setError', error);
             }
         },
+        deleteMood(moodId) {
+            this.$store.dispatch('setError','');
+            this.$store.dispatch('removeMood', moodId);
+            //clean 
+            this.newMood = {};
+            this.message = 'Mood supprimé avec succès.';
+        }
+
     },
     computed: {
         moodList() {
