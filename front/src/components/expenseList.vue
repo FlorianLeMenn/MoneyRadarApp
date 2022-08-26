@@ -22,7 +22,13 @@
                 </div>
                 <div class="ml-auto font-bold text-right">-{{ expense.cost }}€</div>
                 <div class="ml-auto font-bold text-right">
-                    <button v-if="expense.id" @click="this.$store.dispatch('removeExpense', expense.id)">Supprimer</button>
+                    <button v-if="expense.id" @click="this.$store.dispatch('removeExpense', expense.id)">
+                         <svg width="24px" height="24px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="removeIconTitle" stroke="#EF5350" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" color="#000000">
+                            <title id="removeIconTitle">Remove</title> 
+                            <path d="M17,12 L7,12"/>
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
             <div class="mx-auto max-w-sm">

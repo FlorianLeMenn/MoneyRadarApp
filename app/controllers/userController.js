@@ -17,8 +17,8 @@ const userController = {
 
     getUser: async(req, res) => {
         try {
-            const userId    = +req.params.id;
-            const user      = await User.findByPk(userId, {
+            const userId = +req.params.id;
+            const user   = await User.findByPk(userId, {
                 include: ["groups_owner", "my_groups"]
             });
     
